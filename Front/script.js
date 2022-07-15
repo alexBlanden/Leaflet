@@ -11,7 +11,7 @@ var fetchAjax = function (address, query) {
 
 var map = L.map('map').setView([51.505, -0.09], 13);
 
-L.tileLayer('https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=gce3UfFmnaOupUCQzm4b',{
+L.tileLayer('https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=',{
     maxZoom: 19,
     attribution: 'OpenStreetMap'
 }).addTo(map);
