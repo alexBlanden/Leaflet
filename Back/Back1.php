@@ -1,12 +1,15 @@
 <?php
+use Dotenv\Dotenv;
 
 ini_set('display_errors', 'On');
 error_reporting(E_ALL);
 
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
 
-$map_tiler_API = "";
+$map_tiler_API = $_ENV['map_tiler_API'];
 
-$open_cage_API = "";
+$open_cage_API = $_ENV['open_cage_API'];
 
 
 $url = 'https://api.opencagedata.com/geocode/v1/json?q=-23.5373732,-46.8374628&pretty=1&key=' . $open_cage_API;
