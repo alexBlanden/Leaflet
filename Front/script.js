@@ -26,17 +26,19 @@ map.locate({setView: true, maxZoom: 16});
 
 
 function onLocationFound(e) {
+    //Is Geolcation supported? If so, set lat and lng variables
     if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showPosition)
+        navigator.geolocation.getCurrentPosition(determineCoordinates)
     } else {
         document.getElementById("map").innerHTML =
         "Geolocation is not supported by this browser.";
     }
-    function showPosition(position){
+    function determineCoordinates(position){
             lat = position.coords.latitude;
             lng = position.coords.longitude;
             console.log(lat, lng);
      }
+    //Add marker at user's location and add popup
     var radius = e.accuracy;
     L.marker(e.latlng).addTo(map)
         .bindPopup(`You are within ${Math.floor(radius)} meters from this point. Coordinates: ${e.latlng.toString()}`).openPopup();
@@ -55,9 +57,6 @@ function onLocationError(e) {
 
 
 map.on('locationerror', onLocationError);
-
-
-
 
 
 $(function(){
