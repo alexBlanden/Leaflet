@@ -7,6 +7,9 @@ var fetchAjax = function (address, query) {
     });
 }
 
+var lat;
+var lng;
+
 
 
 var map = L.map('map').setView([51.505, -0.09], 13);
@@ -21,44 +24,37 @@ L.tileLayer('https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=gce3UfFmn
 
 map.locate({setView: true, maxZoom: 16});
 
-let lat;
-let lng;
 
-async function loadUserLocation(){
-
-    function onLocationFound(e) {
-        var radius = e.accuracy;
-        console.log(e.latitude);
-        console.log(e.longitude);
-        lat= e.latitude;
-        lng = e.longitude;
-
-
-        L.marker(e.latlng).addTo(map)
-            .bindPopup(`You are within ${Math.floor(radius)} meters from this point. Coordinates: ${e.latlng.toString()}`).openPopup();
-        
+function onLocationFound(e) {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition)
+    } else {
+        document.getElementById("map").innerHTML =
+        "Geolocation is not supported by this browser.";
+    }
+    function showPosition(position){
+            lat = position.coords.latitude;
+            lng = position.coords.longitude;
+            console.log(lat, lng);
+     }
+    var radius = e.accuracy;
+    L.marker(e.latlng).addTo(map)
+        .bindPopup(`You are within ${Math.floor(radius)} meters from this point. Coordinates: ${e.latlng.toString()}`).openPopup();
         L.circle(e.latlng, radius).addTo(map);
     }
 
-    map.on('locationfound', onLocationFound);
-    function onLocationError(e) {
-        alert(e.message);
 
-    }
+map.on('locationfound', onLocationFound)
 
 
-    map.on('locationerror', onLocationError);
+
+function onLocationError(e) {
+    alert(e.message);
 
 }
 
-loadUserLocation().then(
-    console.log(`User coordinates are ${lat} by ${lng}`)
-)
 
-
-
-
-
+map.on('locationerror', onLocationError);
 
 
 
