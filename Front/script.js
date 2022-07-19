@@ -7,68 +7,50 @@ var fetchAjax = function (address, query) {
     });
 }
 
+
+var map;
 var lat;
 var lng;
 
+//If getCurrentPosition is successful, load as appropriate. If not, display error for user 
+const success = (position) => {
+    lat =  position.coords.latitude;
+    lng = position.coords.longitude;
+    console.log(lat)
+    loadMap()
+}
+const fail = (error) => {
+    document.getElementById("map").innerHTML =
+        "Geolocation is not supported by this browser."
+    console.log(error)
+}
+//Use Navigator object method to determine user's latitude and longitude
+navigator.geolocation.getCurrentPosition(success, fail)
 
-
-var map = L.map('map').setView([51.505, -0.09], 13);
-
-L.tileLayer('https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=gce3UfFmnaOupUCQzm4b',{
+//loadMap called as part of success callback
+function loadMap () {
+    map = L.map('map').setView([lat, lng], 13)
+    L.tileLayer('https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=gce3UfFmnaOupUCQzm4b',
+    {
     maxZoom: 19,
     attribution: 'OpenStreetMap'
-}).addTo(map);
-
-
-
-
-map.locate({setView: true, maxZoom: 16});
-
-
-function onLocationFound(e) {
-    //Is Geolcation supported? If so, set lat and lng variables
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(determineCoordinates)
-    } else {
-        document.getElementById("map").innerHTML =
-        "Geolocation is not supported by this browser.";
-    }
-    function determineCoordinates(position){
-            lat = position.coords.latitude;
-            lng = position.coords.longitude;
-            console.log(lat, lng);
-     }
-    //Add marker at user's location and add popup
-    var radius = e.accuracy;
-    L.marker(e.latlng).addTo(map)
-        .bindPopup(`You are within ${Math.floor(radius)} meters from this point. Coordinates: ${e.latlng.toString()}`).openPopup();
-        L.circle(e.latlng, radius).addTo(map);
-    }
-
-
-map.on('locationfound', onLocationFound)
-
-
-
-function onLocationError(e) {
-    alert(e.message);
-
+    }).addTo(map);
+    L.marker([lat, lng]).addTo(map)
+        .bindPopup(`<p>This is your location. Coordinates: ${lat} by ${lng}</p>`).openPopup();
+        L.circle([lat, lng], {radius: 500}).addTo(map);
 }
 
 
-map.on('locationerror', onLocationError);
-
-
-$(function(){
-    var contactServer = fetchAjax(
-        '../Back/Back1.php',
-        {
-            lat,
-            lng
-        }
-    );
-    $.when(contactServer).then(function(result){
-        console.log(result);
-    })
-});
+// $(function(){
+//     var contactServer = fetchAjax(
+//         '../Back/Back1.php',
+//         {
+//             lat,
+//             lng
+//         }
+//     );
+//     $.when(contactServer).then(function(result){
+//         console.log(result);
+//     })
+// });
 
