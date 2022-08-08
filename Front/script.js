@@ -17,6 +17,7 @@ const success = (position) => {
     lat =  position.coords.latitude;
     lng = position.coords.longitude;
     console.log(lat)
+    console.log(lng)
     loadMap()
 }
 const fail = (error) => {
@@ -29,7 +30,7 @@ navigator.geolocation.getCurrentPosition(success, fail)
 
 //loadMap called as part of success callback
 function loadMap () {
-    map = L.map('map').setView([lat, lng], 13)
+    map = L.map("map").setView([lat, lng], 13)
     L.tileLayer('https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=gce3UfFmnaOupUCQzm4b',
     {
     maxZoom: 19,
@@ -41,7 +42,7 @@ function loadMap () {
 }
 
 
-// $(function(){
+// $("btn btn-primary").click(function(){
 //     var contactServer = fetchAjax(
 //         '../Back/Back1.php',
 //         {
@@ -54,3 +55,18 @@ function loadMap () {
 //     })
 // });
 
+$(document).ready(function(){
+    $("button").click(function(){
+        console.log("sending info....")
+        var contactServer = fetchAjax(
+            '../Back/Back1.php',
+            {
+                lat,
+                lng
+            }
+        );
+        $.when(contactServer).then(function(result){
+            console.log(result);
+        })
+    });
+  });

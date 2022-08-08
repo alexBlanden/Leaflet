@@ -14,9 +14,9 @@ $map_tiler_API = $_ENV['map_tiler_API'];
 $open_cage_API = $_ENV['open_cage_API'];
 
 
-// $url = 'https://api.opencagedata.com/geocode/v1/json?q=-23.5373732,-46.8374628&pretty=1&key=' . $open_cage_API;
+$url = 'https://api.opencagedata.com/geocode/v1/json?q=-51.3507328,1.245184&pretty=1&key=67db27e8a6694f80b31ed9eec629c0d1';
 
-$url = 'https://api.opencagedata.com/geocode/v1/json?q='. $_REQUEST['data']['lat'].','.$_REQUEST['data']['lng'].'&pretty=1&key='.$open_cage_API;
+// $url = 'https://api.opencagedata.com/geocode/v1/json?q='. $_REQUEST['data']['lat'].','.$_REQUEST['data']['lng'].'&pretty=1&key='.$open_cage_API;
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);

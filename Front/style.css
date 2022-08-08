@@ -1,4 +1,8 @@
-html, body, #map {
+html, body, .container, #map {
     height: 100%;
-    width: 100vw;
+    width: 50vw;
+}
+
+.container {
+    align-items: center;
 }
