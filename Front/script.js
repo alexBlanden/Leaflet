@@ -67,6 +67,8 @@ $(document).ready(function(){
         );
         $.when(contactServer).then(function(result){
             console.log(result);
+        }, function(err){
+            console.log(`Error:${err.responseText}`)
         })
     });
   });
