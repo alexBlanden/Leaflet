@@ -59,7 +59,7 @@ $(document).ready(function(){
     $("button").click(function(){
         console.log("sending info....")
         var contactServer = fetchAjax(
-            '../Back/Back1.php',
+            'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/Back1.php',
             {
                 lat,
                 lng
@@ -68,7 +68,7 @@ $(document).ready(function(){
         $.when(contactServer).then(function(result){
             console.log(result);
         }, function(err){
-            console.log(`Error:${err.responseText}`)
+            console.error(`Error:${err.responseText}`)
         })
     });
   });
