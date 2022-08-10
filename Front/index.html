@@ -29,12 +29,23 @@
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
         <!-- <main> -->
-            <div class="container">
-                <h1 class="display-1">My Map</h1>
-                <button type="button" class="btn btn-primary">Primary</button>
-                <div id="map"></div>
-            </div>
-        <!-- </main> -->
+            <button>Go</button>
+        <div class="d-flex p-2 container">
+            <a href="#sidebar" class="d-block mt-3" data-bs-toggle="offcanvas" role="button" aria-controls="sidebar">
+                Info
+            </a>
+            <div id="map"></div> 
+        </div>
+                <!-- </main> -->
         <script src="./script.js"></script>
+
+        <!-- offcanvas -->
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebar" aria-labelledby="sidebar-label">
+            <ul>
+                <li><h2 id="country"></h2></li>
+                <li id="weather">Current Weather</li>
+
+            </ul>
+        </div>
     </body>
 </html>

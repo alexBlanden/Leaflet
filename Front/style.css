@@ -1,8 +1,13 @@
+* {
+    padding: 2%;
+}
 html, body, .container, #map {
-    height: 100%;
-    width: 50vw;
+    height: 95%;
+    width: 95vw;
 }
 
+
 .container {
+    position: absolute;
     align-items: center;
 }

@@ -46,7 +46,7 @@ $decode = json_decode($result, true);
 
 
 $output['status']['code'] = '200';
-$output['status']['name'] = 'queryResult';
+$output['status']['name'] = 'openCageQueryResult';
 $output['status']['description'] = 'success';
 $output['data'] = $decode;
 
