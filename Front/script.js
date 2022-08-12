@@ -79,3 +79,37 @@ $(document).ready(function(){
         })
     });
   });
+
+
+
+$(document).ready(function(){
+    $(".mylinks").click(function (){
+        $("#map, .gobutton, nav").css("filter","blur(8px)")
+    })
+    
+    $('#map').click(function(){
+        $("#map").css("filter","");
+        // alert("HI")
+    })
+
+    $('.btn-close').click(function(){
+        $("#map, .gobutton, nav").css("filter","");
+        // alert("HI")
+    })
+})
+
+// $(".btn-close").click(function (){
+//     $("#map").css("filter", "blur(0px)")
+// })
+
+
+// var offcanvas = document.getElementsByClassName('offcanvas');
+
+// offcanvas.addEventListener('show.bs.offcanvas', function () {
+//     $("#map").css("filter", "blur(8px)");
+// })
+
+// offcanvas.addEventListener('hide.bs.offcanvas', function () {
+//     $("#map").css("filter", "blur(0px)");
+// })
+

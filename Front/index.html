@@ -29,23 +29,37 @@
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
         <!-- <main> -->
-            <button>Go</button>
-        <div class="d-flex p-2 container">
-            <a href="#sidebar" class="d-block mt-3" data-bs-toggle="offcanvas" role="button" aria-controls="sidebar">
-                Info
+            <nav class="navbar navbar-expand-sm navbar-light bg-light">
+                <a href="#countryinfo" class="d-block mt-3 mylinks" data-bs-toggle="offcanvas" role="button" aria-controls="sidebar">
+                    Info
+                </a>
+                <a href="#navigation" class="d-block mt-3 mylinks" data-bs-toggle="offcanvas"
+                role="button" aria-controls="sidebar">
+                Navigation
             </a>
+            </nav>
+            <button class="gobutton">Go</button>
             <div id="map"></div> 
         </div>
                 <!-- </main> -->
         <script src="./script.js"></script>
 
         <!-- offcanvas -->
-        <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebar" aria-labelledby="sidebar-label">
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="countryinfo" aria-labelledby="sidebar-label">
+            <div class="offcanvas-header">
+                <h2 class="offcanvas-title"></h2>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+            </div>
             <ul>
                 <li><h2 id="country"></h2></li>
                 <li id="weather">Current Weather</li>
-
             </ul>
+        </div>
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="navigation" aria-labelledby="sidebar-label">
+            <div class="offcanvas-header">
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+                <h2 class="offcanvas-title">How Do I Blur the Map?</h2>
+            </div>
         </div>
     </body>
 </html>

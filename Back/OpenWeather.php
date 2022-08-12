@@ -13,20 +13,8 @@ $dotenv->load();
 
 // $open_cage_API = $_ENV['open_cage_API'];
 
-// //Plain Url for testing purposes:
+// //Url with api key visible for testing purposes:
 $url = 'https://api.openweathermap.org/data/2.5/weather?lat='. $_REQUEST['lat'].'&lon='.$_REQUEST['lng'].'&appid=72052d0003578ec1018f92899a2a06d2';    
-
-        // ______________________
-
-//Url with lat and lng set by jquery ajax request
-// $url = 'https://api.opencagedata.com/geocode/v1/json?q='. $_REQUEST['data']['lat'].','.$_REQUEST['data']['lng'].'&pretty=1&key=67db27e8a6694f80b31ed9eec629c0d1';
-
-        // ______________________
-
-
-//Url with lat, lang and api key set from env variable:
-
-// $url = 'https://api.opencagedata.com/geocode/v1/json?q='. $_REQUEST['data']['lat'].','.$_REQUEST['data']['lng'].'&pretty=1&key='.$open_cage_API;
 
         // ______________________
 
