@@ -13,10 +13,17 @@ var lat;
 var lng;
 var iso_a2;
 var iso_a3;
-
+var borderCoordinates
 
 function populateCountrySelect (result) {
-
+    for(let i= 0; i < result.data.length; i++){
+        $('#country_menu').append(
+            `<li
+            class="country_menu_select"
+            data-iso-a2="${result.data[i].iso_a2}"
+            data-iso-a3="${result.data[i].iso_a3}"
+            data-coordinates="${result.data[i].coordinates}"><a class="dropdown-item" href="#">${result.data[i].name}</a></li>`);
+    }
 }
 //If getCurrentPosition is successful, load as appropriate. If not, display error for user 
 const success = (position) => {
@@ -98,7 +105,7 @@ $(document).ready(function(){
             }
         );
         $.when(getGeoJson).then(function (result){
-            console.log(JSON.stringify(result,null,2));
+            // console.log(JSON.stringify(result,null,2));
             for(let i= 0; i < result.data.length; i++){
                 $('#country_menu').append(
                     `<li
@@ -107,18 +114,20 @@ $(document).ready(function(){
                     data-iso-a3="${result.data[i].iso_a3}"
                     data-coordinates="${result.data[i].coordinates}"><a class="dropdown-item" href="#">${result.data[i].name}</a></li>`);
             }
+
+            $(".country_menu_select").click(function(){
+                iso_a2 = $('.country_menu_select').attr('data-iso-a2')
+                let stringCoordinates = $('.country_menu_select').attr('data-coordinates')
+                console.log(iso_a2);
+                })
+
         }, function(err){
             console.error(err.responseText);
         })
     })
   });
 
-  $(document).ready(function() {
-    $(".country_menu_select").click(function(){
-    var a2 = $('.country_menu_select').attr('data-iso-a2')
-    })
-    console.log(a2);
-  })
+  
 
 
 //CSS blur effect:
