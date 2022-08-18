@@ -11,20 +11,10 @@ var fetchAjax = function (address, query) {
 var map;
 var lat;
 var lng;
-var iso_a2;
-var iso_a3;
-var borderCoordinates
 
-function populateCountrySelect (result) {
-    for(let i= 0; i < result.data.length; i++){
-        $('#country_menu').append(
-            `<li
-            class="country_menu_select"
-            data-iso-a2="${result.data[i].iso_a2}"
-            data-iso-a3="${result.data[i].iso_a3}"
-            data-coordinates="${result.data[i].coordinates}"><a class="dropdown-item" href="#">${result.data[i].name}</a></li>`);
-    }
-}
+var mapBorder = null;
+
+
 //If getCurrentPosition is successful, load as appropriate. If not, display error for user 
 const success = (position) => {
     lat =  position.coords.latitude;
@@ -52,11 +42,7 @@ function loadMap () {
     L.marker([lat, lng]).addTo(map)
         .bindPopup(`Found you! Click Info to find out more</p>`).openPopup();
         L.circle([lat, lng], {radius: 500}).addTo(map);
-    
-    // var geoJson = L.geoJson(euCountries).addTo(map);
-    // geoJson.eachLayer(function (layer) {
-    //     layer.bindPopup(layer.feature.properties.name);
-    // });
+        console.log(mapBorder)
 }
 
 function getWeather() {
@@ -77,6 +63,14 @@ function getWeather() {
     
 }
 
+// function drawBorder(coordinates){
+//     L.geoJSON(coordinates, {
+//         color: "green",
+//         weight: 14,
+//         opacity: 1,
+//         fillOpacity: 0.0 
+//       }).addTo(map);
+// }
 
 $(document).ready(function(){
     $(".APIbutton").click(function(){
@@ -108,25 +102,35 @@ $(document).ready(function(){
             // console.log(JSON.stringify(result,null,2));
             for(let i= 0; i < result.data.length; i++){
                 $('#country_menu').append(
-                    `<li
-                    class="country_menu_select"
-                    data-iso-a2="${result.data[i].iso_a2}"
-                    data-iso-a3="${result.data[i].iso_a3}"
-                    data-coordinates="${result.data[i].coordinates}"><a class="dropdown-item" href="#">${result.data[i].name}</a></li>`);
+                    `<option class="country_menu_select" value="${result.data[i].iso_a2}">${result.data[i].name}</option>`)     
             }
 
-            $(".country_menu_select").click(function(){
-                iso_a2 = $('.country_menu_select').attr('data-iso-a2')
-                let stringCoordinates = $('.country_menu_select').attr('data-coordinates')
-                console.log(iso_a2);
+            $("#country_menu").change(function(){
+                var country_iso = $('#country_menu').val()
+                var countryBorders = fetchAjax(
+                    `http://localhost/LEAFLET_PRACTICE/Leaflet/Back/geoJsonCoordinates.php`,
+                    {country_iso}
+                );$.when(countryBorders).then(function(result){
+                    console.log(result.data[0])
+                    if(mapBorder){
+                        mapBorder.remove()
+                    }
+                    mapBorder = L.geoJson().addTo(map)
+                    mapBorder.addData(result.data[0].coordinates);
+                    
+                }, function(err){
+                    console.log(err.responseText);
                 })
+            }
+            );
+            
 
         }, function(err){
             console.error(err.responseText);
         })
     })
-  });
 
+});
   
 
 

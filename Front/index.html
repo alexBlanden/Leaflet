@@ -40,6 +40,7 @@
             </nav>
             <button class="APIbutton">API</button>
             <button class="Geobutton">GeoJson</button>
+            <button class="Bordersbutton">GetBorders</button>
             <div id="map"></div> 
         </div>
                 <!-- </main> -->
@@ -61,13 +62,10 @@
                 <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
                 <h4 class="offcanvas-title">Pick A Country:</h4>
             </div>
-        <div class="dropdown">
-            <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
-                Countries
-            </button>
-            <ul class="dropdown-menu pre-scrollable" id="country_menu">
-              </ul>
-        </div>    
+        <select class="form-select" id="country_menu">
+            <option selected>Pick a Country</option>
+              
+        </select>    
         </div>
     </body>
 </html>
