@@ -12,12 +12,10 @@ var map;
 var lat;
 var lng;
 
-var countrySelect;
-
-var countrySelectLatLng = {
-    Lat: "",
-    Lng: ""
-};
+var countrySelect
+var countrySelectLat
+var countrySelectLng
+var countrySelectIso
 
 var mapBorder = null;
 
@@ -55,7 +53,7 @@ function updateCountryStats (){
     var contactRestCountries = fetchAjax(
         'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/RestCountries.php',
         {
-            
+
         }
     )
 }
@@ -84,6 +82,20 @@ function getWeather(latitude, longitude) {
         console.error(error.responseText)
     })
     
+}
+
+function getFromRestCountries(iso) {
+    var contactRestCountries = fetchAjax(
+        'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/RestCountries.php',
+        {
+            iso
+        }
+    );
+    $.when(contactRestCountries).then(function(result){
+        console.log(result)
+    }, function(error){
+        console.log(error.responseText)
+    })
 }
 
 
@@ -121,35 +133,46 @@ $(document).ready(function(){
             }
 
             $("#country_menu").change(function(){
+                //Value made up of iso code and name of country
                 var countryVal = JSON.parse($('#country_menu').val())
-                let currentCountryIso = countryVal.iso;
+                const currentCountryIso =countryVal.iso;
+                countryIso = countryVal.iso
+                const currentCountryName = encodeURI(countryVal.name);
                 countrySelect = countryVal.name;
-                let currentCountryName = encodeURI(countryVal.name);
-                console.log(currentCountryName)
+
+                //First retrieve static borders from geojson file
                 var countryBorders = fetchAjax(
                     `http://localhost/LEAFLET_PRACTICE/Leaflet/Back/geoJsonCoordinates.php`,
                     {currentCountryIso}
                 );$.when(countryBorders).then(function(result){
+                    //Check for previous selected country's border
                     if(mapBorder){
                         mapBorder.remove()
                     }
+                    //Add empty layer to map
                     mapBorder = L.geoJson().addTo(map)
+                    //Add data to layer
                     mapBorder.addData(result.data[0].coordinates);
+                    //Center map view on newly selected country
                     map.flyToBounds(mapBorder.getBounds())
                     
                 }, function(err){
                     console.log(err.responseText);
                 })
+                //Perform forward Geocoding using country name
                 var contactOpenCageForward = fetchAjax(
                     'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/ForwardOpenCage.php',
                     {
                         currentCountryName
                     } 
                 );$.when(contactOpenCageForward).then(function(result){
-                    countrySelectLatLng.Lat = result.data.results[0].geometry.lat;
-                    countrySelectLatLng.Lng = result.data.results[0].geometry.lng;
-                    console.log(countrySelectLatLng.Lat)
-                    getWeather(countrySelectLatLng.Lat, countrySelectLatLng.Lng)
+                    console.log(result.data.results[0])
+                    //Set Latitude and Longitude
+                    countrySelectLat = result.data.results[0].geometry.lat;
+                    countrySelectLng = result.data.results[0].geometry.lng;
+                    //Populate Weather Info
+                    getWeather(countrySelectLat, countrySelectLng)
+                    getFromRestCountries(currentCountryIso)
                 }, function (err){
                     console.error(err.responseText)
                 }) 

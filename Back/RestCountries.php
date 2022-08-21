@@ -14,7 +14,7 @@ $dotenv->load();
 // $open_cage_API = $_ENV['open_cage_API'];
 
 // //Url with api key visible for testing purposes:
-$url = 'https://api.openweathermap.org/data/2.5/weather?lat='. $_REQUEST['latitude'].'&lon='.$_REQUEST['longitude'].'&appid=72052d0003578ec1018f92899a2a06d2';    
+$url = 'https://restcountries.com/v3.1/alpha/'.$_REQUEST['iso'];    
 
         // ______________________
 
