@@ -7,7 +7,7 @@ $decode = json_decode($countryBordersFileContent, true);
 
 $iso_and_coordinates = [];
 
-$requested_country = $_REQUEST['country_iso'];
+$requested_country = $_REQUEST['currentCountryIso'];
 $length = count($decode['features']);
 
 for($i=0; $i < $length; $i++){

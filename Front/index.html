@@ -40,7 +40,6 @@
             </nav>
             <button class="APIbutton">API</button>
             <button class="Geobutton">GeoJson</button>
-            <button class="Bordersbutton">GetBorders</button>
             <div id="map"></div> 
         </div>
                 <!-- </main> -->
@@ -52,11 +51,16 @@
                 <h2 class="offcanvas-title"></h2>
                 <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
             </div>
-            <ul>
-                <li><h2 id="country"></h2></li>
-                <li id="weather">Current Weather</li>
-            </ul>
+            <div id="infocontainer">
+                <ul>
+                    <li><h2 id="country"></h2></li>
+                    <li id="weather"><img id="wicon" src="" alt="Weather Icon"></li>
+                </ul>
+            </div>
+
         </div>
+
+
         <div class="offcanvas offcanvas-end" tabindex="-1" id="navigation" aria-labelledby="sidebar-label">
             <div class="offcanvas-header">
                 <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>

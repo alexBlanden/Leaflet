@@ -13,14 +13,25 @@ $dotenv->load();
 
 // $open_cage_API = $_ENV['open_cage_API'];
 
-// //Url with api key visible for testing purposes:
-$url = 'https://api.openweathermap.org/data/2.5/weather?lat='. $_REQUEST['latitude'].'&lon='.$_REQUEST['longitude'].'&appid=72052d0003578ec1018f92899a2a06d2';    
+// //Plain Url for tsting purposes:
+$url = 'https://api.opencagedata.com/geocode/v1/json?q='.$_REQUEST['currentCountryName'].'&key=67db27e8a6694f80b31ed9eec629c0d1';    
+
+        // ______________________
+
+//Url with lat and lng set by jquery ajax request
+// $url = 'https://api.opencagedata.com/geocode/v1/json?q='. $_REQUEST['data']['lat'].','.$_REQUEST['data']['lng'].'&pretty=1&key=67db27e8a6694f80b31ed9eec629c0d1';
+
+        // ______________________
+
+
+//Url with lat, lang and api key set from env variable:
+
+// $url = 'https://api.opencagedata.com/geocode/v1/json?q='. $_REQUEST['data']['lat'].','.$_REQUEST['data']['lng'].'&pretty=1&key='.$open_cage_API;
 
         // ______________________
 
 
 //Curl Session:
-
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -35,14 +46,13 @@ $decode = json_decode($result, true);
 
 
 $output['status']['code'] = '200';
-$output['status']['name'] = 'weatherQueryResult';
+$output['status']['name'] = 'openCageForwardQueryResult';
 $output['status']['description'] = 'success';
 $output['data'] = $decode;
 
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json; charset=UTF-8');
 
-// print_r($_REQUEST);
 
 echo json_encode($output);
 

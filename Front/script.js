@@ -12,6 +12,13 @@ var map;
 var lat;
 var lng;
 
+var countrySelect;
+
+var countrySelectLatLng = {
+    Lat: "",
+    Lng: ""
+};
+
 var mapBorder = null;
 
 
@@ -42,20 +49,36 @@ function loadMap () {
     L.marker([lat, lng]).addTo(map)
         .bindPopup(`Found you! Click Info to find out more</p>`).openPopup();
         L.circle([lat, lng], {radius: 500}).addTo(map);
-        console.log(mapBorder)
 }
 
-function getWeather() {
+function updateCountryStats (){
+    var contactRestCountries = fetchAjax(
+        'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/RestCountries.php',
+        {
+            
+        }
+    )
+}
+
+function getWeather(latitude, longitude) {
     var contactOpenWeather = fetchAjax (
         'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/OpenWeather.php',
         {
-            lat,
-            lng
+            latitude,
+            longitude
         }
     );
     $.when(contactOpenWeather).then(function(result){
-        $("#country").html(`Welcome to ${result.data.sys.country}`)
-        $("#weather").html(`The weather is ${result.data.weather[0].description}`)
+        //Populate weather info
+        const weatherUrl = `http://openweathermap.org/img/w/${result.data.weather[0].icon}.png`
+        let iconElement = `<img id="wicon" src="${weatherUrl}" alt="Weather Icon"></img>`
+        console.log(result)
+        $("#country").html(`Welcome to ${countrySelect}`)
+        $("#weather").html(`The weather is ${result.data.weather[0].description}${iconElement}`)
+        $("#wicon").attr('src', `http://openweathermap.org/img/w/${result.data.weather[0].icon}.png`)
+        //Populate Country facts
+
+
 
     }, function(error){
         console.error(error.responseText)
@@ -63,14 +86,6 @@ function getWeather() {
     
 }
 
-// function drawBorder(coordinates){
-//     L.geoJSON(coordinates, {
-//         color: "green",
-//         weight: 14,
-//         opacity: 1,
-//         fillOpacity: 0.0 
-//       }).addTo(map);
-// }
 
 $(document).ready(function(){
     $(".APIbutton").click(function(){
@@ -84,7 +99,7 @@ $(document).ready(function(){
         );
         $.when(contactOpenCage).then(function(result){
             console.log(result);
-            getWeather()
+            getWeather(lat, lng)
         }, function(err){
             console.error(`Error:${err.responseText}`)
         })
@@ -102,29 +117,44 @@ $(document).ready(function(){
             // console.log(JSON.stringify(result,null,2));
             for(let i= 0; i < result.data.length; i++){
                 $('#country_menu').append(
-                    `<option class="country_menu_select" value="${result.data[i].iso_a2}">${result.data[i].name}</option>`)     
+                    `<option class="country_menu_select" value='{"iso":"${result.data[i].iso_a2}", "name":"${result.data[i].name}"}'>${result.data[i].name}</option>`)     
             }
 
             $("#country_menu").change(function(){
-                var country_iso = $('#country_menu').val()
+                var countryVal = JSON.parse($('#country_menu').val())
+                let currentCountryIso = countryVal.iso;
+                countrySelect = countryVal.name;
+                let currentCountryName = encodeURI(countryVal.name);
+                console.log(currentCountryName)
                 var countryBorders = fetchAjax(
                     `http://localhost/LEAFLET_PRACTICE/Leaflet/Back/geoJsonCoordinates.php`,
-                    {country_iso}
+                    {currentCountryIso}
                 );$.when(countryBorders).then(function(result){
-                    console.log(result.data[0])
                     if(mapBorder){
                         mapBorder.remove()
                     }
                     mapBorder = L.geoJson().addTo(map)
                     mapBorder.addData(result.data[0].coordinates);
+                    map.flyToBounds(mapBorder.getBounds())
                     
                 }, function(err){
                     console.log(err.responseText);
                 })
+                var contactOpenCageForward = fetchAjax(
+                    'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/ForwardOpenCage.php',
+                    {
+                        currentCountryName
+                    } 
+                );$.when(contactOpenCageForward).then(function(result){
+                    countrySelectLatLng.Lat = result.data.results[0].geometry.lat;
+                    countrySelectLatLng.Lng = result.data.results[0].geometry.lng;
+                    console.log(countrySelectLatLng.Lat)
+                    getWeather(countrySelectLatLng.Lat, countrySelectLatLng.Lng)
+                }, function (err){
+                    console.error(err.responseText)
+                }) 
             }
             );
-            
-
         }, function(err){
             console.error(err.responseText);
         })
@@ -137,11 +167,11 @@ $(document).ready(function(){
 //CSS blur effect:
 $(document).ready(function(){
     $(".mylinks").click(function (){
-        $("#map, .gobutton, nav").css("filter","blur(8px)")
+        $("#map, .APIbutton, .Geobutton, nav").css("filter","blur(8px)")
     })
     
     $('#map').click(function(){
-        $("#map").css("filter","");
+        $("#map, .gobutton, nav").css("filter","");
     })
 
     $('.btn-close').click(function(){
