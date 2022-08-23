@@ -54,8 +54,8 @@ const success = (position) => {
     }
     //Use data in initialLocationObject to generate html for info:
     function writeData () {
-        updateCountryInfo(
-            initialLocationData.flag, 
+        updateWeatherInfo(
+            initialLocationData.weather.icon, 
             initialLocationData.weather.description, initialLocationData.countryName
             )
     }
@@ -85,9 +85,8 @@ function loadMap () {
 }
 
 //Uses latitude and longitude to add data to initialLocation object
-
 function getLocationFromCoordinates () {
-    //Uses lat/lng to retrieve info from openCage for object on line 13
+    
     const lat = initialLocationData.lat;
     const lng = initialLocationData.lng;
     var contactOpenCage = fetchAjax(
@@ -118,9 +117,8 @@ function getInitialBorders () {
 
     })
 }
-
+//Uses coordinates to get weather info for user lat/lng
 function getWeather(latitude, longitude) {
-    //Uses coordinates to get weather info for user lat/lng
     var contactOpenWeather = fetchAjax (
         'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/OpenWeather.php',
         {
@@ -133,13 +131,14 @@ function getWeather(latitude, longitude) {
         console.log(`data returned from weather API is ${result.data.weather[0].icon}`)
         initialLocationData.weather.description = result.data.weather[0].description;
         initialLocationData.weather.icon = result.data.weather[0].icon
+        console.log(initialLocationData.weather.icon)
     }, function(error){
         console.error(error.responseText)
     })
     
 }
 
-function updateCountryInfo (weatherIcon, weatherDescription, countryName){
+function updateWeatherInfo (weatherIcon, weatherDescription, countryName){
     const weatherUrl = `http://openweathermap.org/img/w/${weatherIcon}.png`
     const iconElement = `<img id="wicon" src="${weatherUrl}" alt="Weather Icon"></img>`
 
