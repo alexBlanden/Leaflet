@@ -37,7 +37,7 @@ var mapBorder = null;
 
 
 //If getCurrentPosition is successful, load as appropriate. If not, display error for user 
-const success = async (position) => {
+const success = (position) => {
     initialLocationData.lat =  position.coords.latitude;
     initialLocationData.lng = position.coords.longitude;
     console.log(initialLocationData.lat)
@@ -45,16 +45,21 @@ const success = async (position) => {
 
     loadMap()
 
-
-   await getLocationFromCoordinates()
-   await getWeather(initialLocationData.lat, initialLocationData.lng)
-    
-    
-  
-    updateCountryInfo(
-        initialLocationData.flag, 
-        initialLocationData.weather.description, initialLocationData.countryName
-        )
+    //Call opencage and openweather APIs which update initialLocationData object:
+    function collectData () {
+        getLocationFromCoordinates(),
+        getWeather(initialLocationData.lat, initialLocationData.lng),
+        console.log(`getting weather info`)
+        
+    }
+    //Use data in initialLocationObject to generate html for info:
+    function writeData () {
+        updateCountryInfo(
+            initialLocationData.flag, 
+            initialLocationData.weather.description, initialLocationData.countryName
+            )
+    }
+   $.when(collectData).then(writeData);
 }
 const fail = (error) => {
     document.getElementById("map").innerHTML =
@@ -82,6 +87,7 @@ function loadMap () {
 //Uses latitude and longitude to add data to initialLocation object
 
 function getLocationFromCoordinates () {
+    //Uses lat/lng to retrieve info from openCage for object on line 13
     const lat = initialLocationData.lat;
     const lng = initialLocationData.lng;
     var contactOpenCage = fetchAjax(
@@ -92,6 +98,7 @@ function getLocationFromCoordinates () {
         }
     );
     $.when(contactOpenCage).then(function(result){
+        //saves iso and country name from returned data
         initialLocationData.isoA2 = result.data.results[0].components.country_code;
         initialLocationData.countryName = result.data.results[0].components.state
     }, function(err){
@@ -113,6 +120,7 @@ function getInitialBorders () {
 }
 
 function getWeather(latitude, longitude) {
+    //Uses coordinates to get weather info for user lat/lng
     var contactOpenWeather = fetchAjax (
         'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/OpenWeather.php',
         {
@@ -121,7 +129,7 @@ function getWeather(latitude, longitude) {
         }
     );
     $.when(contactOpenWeather).then(function(result){
-        //Populate weather info
+        //Populate weather info.
         console.log(`data returned from weather API is ${result.data.weather[0].icon}`)
         initialLocationData.weather.description = result.data.weather[0].description;
         initialLocationData.weather.icon = result.data.weather[0].icon
