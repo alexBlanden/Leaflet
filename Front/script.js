@@ -9,9 +9,25 @@ var fetchAjax = function (address, query) {
 
 
 var map;
-var lat;
-var lng;
 
+var initialLocationData = {
+    lat:"",
+    lng:"",
+    countryName:"",
+    countryIsoA2:"",
+    flag:"",
+    weather: {
+        description: "",
+        icon: ""
+    }
+}
+
+var countrySelectData = {
+    lat:"",
+    lng:"",
+    countryName:"",
+    countryIso:""
+}
 var countrySelect
 var countrySelectLat
 var countrySelectLng
@@ -21,12 +37,24 @@ var mapBorder = null;
 
 
 //If getCurrentPosition is successful, load as appropriate. If not, display error for user 
-const success = (position) => {
-    lat =  position.coords.latitude;
-    lng = position.coords.longitude;
-    console.log(lat)
-    console.log(lng)
+const success = async (position) => {
+    initialLocationData.lat =  position.coords.latitude;
+    initialLocationData.lng = position.coords.longitude;
+    console.log(initialLocationData.lat)
+    console.log(initialLocationData.lng)
+
     loadMap()
+
+
+   await getLocationFromCoordinates()
+   await getWeather(initialLocationData.lat, initialLocationData.lng)
+    
+    
+  
+    updateCountryInfo(
+        initialLocationData.flag, 
+        initialLocationData.weather.description, initialLocationData.countryName
+        )
 }
 const fail = (error) => {
     document.getElementById("map").innerHTML =
@@ -38,6 +66,8 @@ navigator.geolocation.getCurrentPosition(success, fail)
 
 //loadMap called as part of success callback
 function loadMap () {
+    const lat = initialLocationData.lat;
+    const lng = initialLocationData.lng; 
     map = L.map("map").setView([lat, lng], 5)
     L.tileLayer('https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=gce3UfFmnaOupUCQzm4b',
     {
@@ -49,13 +79,37 @@ function loadMap () {
         L.circle([lat, lng], {radius: 500}).addTo(map);
 }
 
-function updateCountryStats (){
-    var contactRestCountries = fetchAjax(
-        'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/RestCountries.php',
-        {
+//Uses latitude and longitude to add data to initialLocation object
 
+function getLocationFromCoordinates () {
+    const lat = initialLocationData.lat;
+    const lng = initialLocationData.lng;
+    var contactOpenCage = fetchAjax(
+        'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/openCage.php',
+        {
+            lat,
+            lng
         }
-    )
+    );
+    $.when(contactOpenCage).then(function(result){
+        initialLocationData.isoA2 = result.data.results[0].components.country_code;
+        initialLocationData.countryName = result.data.results[0].components.state
+    }, function(err){
+        console.error(`Error:${err.responseText}`)
+    })
+};
+
+function getInitialBorders () {
+    var getGeoJson = fetchAjax(
+        'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/geoJsonQuery.php',
+        {
+            lat,
+            lng
+        }
+    );
+    $.when(getGeoJson).then(function (result){
+
+    })
 }
 
 function getWeather(latitude, longitude) {
@@ -68,20 +122,21 @@ function getWeather(latitude, longitude) {
     );
     $.when(contactOpenWeather).then(function(result){
         //Populate weather info
-        const weatherUrl = `http://openweathermap.org/img/w/${result.data.weather[0].icon}.png`
-        let iconElement = `<img id="wicon" src="${weatherUrl}" alt="Weather Icon"></img>`
-        console.log(result)
-        $("#country").html(`Welcome to ${countrySelect}`)
-        $("#weather").html(`The weather is ${result.data.weather[0].description}${iconElement}`)
-        $("#wicon").attr('src', `http://openweathermap.org/img/w/${result.data.weather[0].icon}.png`)
-        //Populate Country facts
-
-
-
+        console.log(`data returned from weather API is ${result.data.weather[0].icon}`)
+        initialLocationData.weather.description = result.data.weather[0].description;
+        initialLocationData.weather.icon = result.data.weather[0].icon
     }, function(error){
         console.error(error.responseText)
     })
     
+}
+
+function updateCountryInfo (weatherIcon, weatherDescription, countryName){
+    const weatherUrl = `http://openweathermap.org/img/w/${weatherIcon}.png`
+    const iconElement = `<img id="wicon" src="${weatherUrl}" alt="Weather Icon"></img>`
+
+    $("#country").html(`${countryName}`)
+    $("#weather").html(`The weather is ${weatherDescription}${iconElement}`)
 }
 
 function getFromRestCountries(iso) {
@@ -93,29 +148,24 @@ function getFromRestCountries(iso) {
     );
     $.when(contactRestCountries).then(function(result){
         console.log(result)
+        $("#flag").attr({
+            src:`https://flagcdn.com/w320/${iso.toLowerCase()}.png`,
+            height: '45px'
+        })
     }, function(error){
         console.log(error.responseText)
     })
 }
 
 
+function populateNavigationMenu () {
+
+}
+
 $(document).ready(function(){
-    $(".APIbutton").click(function(){
-        console.log("sending info....")
-        var contactOpenCage = fetchAjax(
-            'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/OpenCage.php',
-            {
-                lat,
-                lng
-            }
-        );
-        $.when(contactOpenCage).then(function(result){
-            console.log(result);
-            getWeather(lat, lng)
-        }, function(err){
-            console.error(`Error:${err.responseText}`)
-        })
-    });
+    // $(".APIbutton").click(function(){
+    //     console.log("sending info....")
+    // }
 
     $(".Geobutton").click(function(){
         var getGeoJson = fetchAjax(
@@ -126,7 +176,6 @@ $(document).ready(function(){
             }
         );
         $.when(getGeoJson).then(function (result){
-            // console.log(JSON.stringify(result,null,2));
             for(let i= 0; i < result.data.length; i++){
                 $('#country_menu').append(
                     `<option class="country_menu_select" value='{"iso":"${result.data[i].iso_a2}", "name":"${result.data[i].name}"}'>${result.data[i].name}</option>`)     
