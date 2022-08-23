@@ -17,7 +17,7 @@ var initialLocationData = {
     countryIsoA2:"",
     flag:"",
     weather: {
-        description: "",
+        description: null,
         icon: ""
     }
 }
@@ -47,19 +47,24 @@ const success = (position) => {
 
     //Call opencage and openweather APIs which update initialLocationData object:
     function collectData () {
-        getLocationFromCoordinates(),
-        getWeather(initialLocationData.lat, initialLocationData.lng),
-        console.log(`getting weather info`)
+        return new Promise((resolve, reject)=>{
+            console.log(`getting info`)
+            getLocationFromCoordinates();
+            getWeather(initialLocationData.lat, initialLocationData.lng);
+            resolve()
+        })
         
     }
     //Use data in initialLocationObject to generate html for info:
-    function writeData () {
+    async function writeData () {
+        console.log('starting')
+        await collectData()
         updateWeatherInfo(
             initialLocationData.weather.icon, 
             initialLocationData.weather.description, initialLocationData.countryName
             )
     }
-   $.when(collectData).then(writeData);
+    writeData()
 }
 const fail = (error) => {
     document.getElementById("map").innerHTML =
