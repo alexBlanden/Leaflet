@@ -26,7 +26,12 @@ var countrySelectData = {
     lat:"",
     lng:"",
     countryName:"",
-    countryIso:""
+    countryIso:"",
+    flag: "",
+    weather: {
+        description: null,
+        icon: ""
+    }
 }
 var countrySelect
 var countrySelectLat
@@ -34,6 +39,7 @@ var countrySelectLng
 var countrySelectIso
 
 var mapBorder = null;
+
 
 
 //If getCurrentPosition is successful, load as appropriate. If not, display error for user 
@@ -45,26 +51,20 @@ const success = (position) => {
 
     loadMap()
 
-    //Call opencage and openweather APIs which update initialLocationData object:
-    function collectData () {
-        return new Promise((resolve, reject)=>{
-            console.log(`getting info`)
-            getLocationFromCoordinates();
-            getWeather(initialLocationData.lat, initialLocationData.lng);
-            resolve()
-        })
-        
+    
+    // getLocationFromCoordinates();
+   function getData(){
+        getInitialWeather(initialLocationData.lat, initialLocationData.lng);
+        getDataFromCoordinates(initialLocationData.lat, initialLocationData.lng);
     }
+
+    getData()
+
     //Use data in initialLocationObject to generate html for info:
-    async function writeData () {
+    function writeData () {
         console.log('starting')
-        await collectData()
-        updateWeatherInfo(
-            initialLocationData.weather.icon, 
-            initialLocationData.weather.description, initialLocationData.countryName
-            )
     }
-    writeData()
+
 }
 const fail = (error) => {
     document.getElementById("map").innerHTML =
@@ -90,10 +90,7 @@ function loadMap () {
 }
 
 //Uses latitude and longitude to add data to initialLocation object
-function getLocationFromCoordinates () {
-    
-    const lat = initialLocationData.lat;
-    const lng = initialLocationData.lng;
+function getDataFromCoordinates (lat, lng) {
     var contactOpenCage = fetchAjax(
         'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/openCage.php',
         {
@@ -105,6 +102,10 @@ function getLocationFromCoordinates () {
         //saves iso and country name from returned data
         initialLocationData.isoA2 = result.data.results[0].components.country_code;
         initialLocationData.countryName = result.data.results[0].components.state
+
+        $("#country").html(`${initialLocationData.countryName}`)
+
+        getFromRestCountries(initialLocationData.isoA2)
     }, function(err){
         console.error(`Error:${err.responseText}`)
     })
@@ -123,7 +124,7 @@ function getInitialBorders () {
     })
 }
 //Uses coordinates to get weather info for user lat/lng
-function getWeather(latitude, longitude) {
+function getInitialWeather(latitude, longitude) {
     var contactOpenWeather = fetchAjax (
         'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/OpenWeather.php',
         {
@@ -133,24 +134,50 @@ function getWeather(latitude, longitude) {
     );
     $.when(contactOpenWeather).then(function(result){
         //Populate weather info.
-        console.log(`data returned from weather API is ${result.data.weather[0].icon}`)
+        console.log(result)
         initialLocationData.weather.description = result.data.weather[0].description;
         initialLocationData.weather.icon = result.data.weather[0].icon
-        console.log(initialLocationData.weather.icon)
+        updateWeatherInfo(
+            initialLocationData.weather.icon, 
+            initialLocationData.weather.description
+            )
     }, function(error){
         console.error(error.responseText)
     })
     
 }
 
-function updateWeatherInfo (weatherIcon, weatherDescription, countryName){
+function getCountrySelectWeather (latitude, longitude) {
+    var contactOpenWeather = fetchAjax (
+        'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/OpenWeather.php',
+        {
+            latitude,
+            longitude
+        }
+    );
+    $.when(contactOpenWeather).then(function(result){
+        //Populate weather info.
+        console.log(result)
+        countrySelectData.weather.description = result.data.weather[0].description;
+        countrySelectData.weather.icon = result.data.weather[0].icon
+        updateWeatherInfo(
+            countrySelectData.weather.icon, 
+            countrySelectData.weather.description
+            )
+    }, function(error){
+        console.error(error.responseText)
+    })
+    
+}
+
+function updateWeatherInfo (weatherIcon, weatherDescription){
     const weatherUrl = `http://openweathermap.org/img/w/${weatherIcon}.png`
     const iconElement = `<img id="wicon" src="${weatherUrl}" alt="Weather Icon"></img>`
 
-    $("#country").html(`${countryName}`)
     $("#weather").html(`The weather is ${weatherDescription}${iconElement}`)
 }
 
+//Use iso code to fetch data from RestCountries API:
 function getFromRestCountries(iso) {
     var contactRestCountries = fetchAjax(
         'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/RestCountries.php',
@@ -164,27 +191,39 @@ function getFromRestCountries(iso) {
             src:`https://flagcdn.com/w320/${iso.toLowerCase()}.png`,
             height: '45px'
         })
+        $("#country").html(`${result.data[0].name.common}`)
+        $("#population > h6").html(`Population: ${displayNumber(result.data[0].population)}`)
+        $("#capitalcity > h6").html(`Capital City: ${result.data[0].capital}`)
     }, function(error){
         console.log(error.responseText)
     })
 }
-
-
-function populateNavigationMenu () {
-
+function displayNumber(number) {
+    const string = number.toString()
+    const length = string.length
+    if(length < 7){
+        return number
+    } else if(length == 7){
+        return(`${string[0]} million`)
+    } else if(length == 8){
+        return(`${string[0]}${string[1]} million`)
+    } else if(length == 9){
+    return(`${string[0]}${string[1]}${string[2]} million`)
+    } else if(length > 9){
+    return(`${string[0]}.${string[1]} billion`)
+    }
 }
+
 
 $(document).ready(function(){
     // $(".APIbutton").click(function(){
     //     console.log("sending info....")
     // }
 
-    $(".Geobutton").click(function(){
         var getGeoJson = fetchAjax(
             'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/geoJsonQuery.php',
             {
-                lat,
-                lng
+                
             }
         );
         $.when(getGeoJson).then(function (result){
@@ -196,9 +235,10 @@ $(document).ready(function(){
             $("#country_menu").change(function(){
                 //Value made up of iso code and name of country
                 var countryVal = JSON.parse($('#country_menu').val())
-                const currentCountryIso =countryVal.iso;
-                countryIso = countryVal.iso
+                countrySelectData.countryIso = countryVal.iso
+                const currentCountryIso = countrySelectData.countryIso;
                 const currentCountryName = encodeURI(countryVal.name);
+                countrySelectData.countryName = countryVal.name;
                 countrySelect = countryVal.name;
 
                 //First retrieve static borders from geojson file
@@ -229,10 +269,10 @@ $(document).ready(function(){
                 );$.when(contactOpenCageForward).then(function(result){
                     console.log(result.data.results[0])
                     //Set Latitude and Longitude
-                    countrySelectLat = result.data.results[0].geometry.lat;
-                    countrySelectLng = result.data.results[0].geometry.lng;
+                    countrySelectData.lat = result.data.results[0].geometry.lat;
+                    countrySelectData.lng = result.data.results[0].geometry.lng;
                     //Populate Weather Info
-                    getWeather(countrySelectLat, countrySelectLng)
+                    getCountrySelectWeather(countrySelectData.lat, countrySelectData.lng)
                     getFromRestCountries(currentCountryIso)
                 }, function (err){
                     console.error(err.responseText)
@@ -242,7 +282,6 @@ $(document).ready(function(){
         }, function(err){
             console.error(err.responseText);
         })
-    })
 
 });
   

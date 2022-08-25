@@ -35,7 +35,7 @@ $decode = json_decode($result, true);
 
 
 $output['status']['code'] = '200';
-$output['status']['name'] = 'weatherQueryResult';
+$output['status']['name'] = 'restCountriesAPI';
 $output['status']['description'] = 'success';
 $output['data'] = $decode;
 
