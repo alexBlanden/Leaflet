@@ -29,19 +29,17 @@
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
         <!-- <main> -->
-            <nav class="navbar navbar-expand-sm navbar-light bg-light">
-                <a href="#countryinfo" class="d-block mt-3 mylinks" data-bs-toggle="offcanvas" role="button" aria-controls="sidebar">
-                    Info
-                </a>
-                <a href="#navigation" class="d-block mt-3 mylinks" data-bs-toggle="offcanvas"
-                role="button" aria-controls="sidebar">
-                Navigation
-            </a>
+            <nav class="navbar navbar-expand-lg navbar-light d-flex justify-content-center">
+                <form class="form-inline">
+                    <a class="btn btn-secondary mylinks" href="#countryinfo" role="button" data-bs-toggle="offcanvas">Info</a>
+
+                    <a class="btn btn-secondary mylinks" href="#navigation" role="button" data-bs-toggle="offcanvas">Navigation</a>
+                </form>
             </nav>
-            <button class="APIbutton">API</button>
-            <button class="Geobutton">GeoJson</button>
+            <!-- <button class="APIbutton">API</button>
+            <button class="Geobutton">GeoJson</button> -->
             
-            <div id="map"></div> 
+            <div id="map" class="rounded"></div> 
         </div>
                 <!-- </main> -->
         <script src="./script.js"></script>
@@ -57,14 +55,23 @@
                 <ul>
                     <li id="population"><h6>Population:</h6></li>
                     <li id="capitalcity"><h6>Capital City:</h6></li>
+                    <li id="language"><h6>Language:</h6></li>
                 </ul>
             </div>
             <div id="weathercontainer">
                 <ul>
+                    <li id="temp"></li>
                     <li id="weather"><img id="wicon" src="" alt="Weather Icon"></li>
                 </ul>
             </div>
-
+            <div id="currencyContainer">
+                <li id="currencyname"></li>
+                <li id="vsthedollar"></li>
+            </div>
+            <div id="wikiContainer">
+                <li id="wikiInfo"></li>
+                <li ><a id="wikiPic" href=""><img src="" alt="" target="_blank"></a></li>
+            </div>
         </div>
 
 

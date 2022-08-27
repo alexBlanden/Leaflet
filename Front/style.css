@@ -6,6 +6,14 @@ html, body, .container, #map {
     width: 95vw;
 }
 
+nav {
+    width: 95vw;
+}
+
+a {
+    text-decoration: none;
+}
+
 
 .container {
     position: absolute;
@@ -13,11 +21,11 @@ html, body, .container, #map {
 }
 
 .offcanvas {
-    background-color: rgba(255, 255, 255, 0.523);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: aliceblue;
 }
 
 #country_menu {
     max-height: 100vh;
     overflow-y: scroll;
 }
-
