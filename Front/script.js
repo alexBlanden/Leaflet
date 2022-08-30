@@ -168,16 +168,12 @@ function getPlacesOfInterest (bbox) {
     $.when(placesOfInterest).then(function(result){
         var myFeatures = []
 
-        
-        if(layerControl){
-            featureGroup.remove()
-            layerControl.remove()
-        }
+        var layerControl = L.control.layers().addTo(map);
         
         var returnedFeatures = JSON.parse(JSON.stringify(result.data.features))
 
         for (let i=0; i < returnedFeatures.length; i++){
-            myFeatures[i] = L.marker([returnedFeatures[i].geometry.coordinates[1], returnedFeatures[i].geometry.coordinates[0]]).bindPopup(`${returnedFeatures[i].properties.name}`)
+            myFeatures[i] = L.marker([returnedFeatures[i].geometry.coordinates[1], returnedFeatures[i].geometry.coordinates[0]]).bindPopup(`<h6>${returnedFeatures[i].properties.name}</h6>`)
         }
 
         var featureGroup = L.layerGroup(myFeatures);
@@ -185,7 +181,6 @@ function getPlacesOfInterest (bbox) {
         //     "Features": featureGroup
         // }
 
-        var layerControl = L.control.layers().addTo(map);
         layerControl.addOverlay(featureGroup, "Features")
     }, function(err){
         console.log(err.responseText)
