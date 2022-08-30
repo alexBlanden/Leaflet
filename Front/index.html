@@ -45,7 +45,7 @@
         <script src="./script.js"></script>
 
         <!-- offcanvas -->
-        <div class="offcanvas offcanvas-start" tabindex="-1" id="countryinfo" aria-labelledby="sidebar-label">
+        <div class="offcanvas offcanvas-start overflow-auto" tabindex="-1" id="countryinfo" aria-labelledby="sidebar-label">
             <div class="offcanvas-header">
                 <h2 class="offcanvas-title" id="country"></h2>
                 <img src="" alt="" id="flag">
@@ -75,7 +75,7 @@
         </div>
 
 
-        <div class="offcanvas offcanvas-end" tabindex="-1" id="navigation" aria-labelledby="sidebar-label">
+        <div class="offcanvas offcanvas-end overflow-auto" tabindex="-1" id="navigation" aria-labelledby="sidebar-label">
             <div class="offcanvas-header">
                 <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
                 <h4 class="offcanvas-title">Pick A Country:</h4>
@@ -83,7 +83,12 @@
         <select class="form-select" id="country_menu">
             <option selected>Pick a Country</option>
               
-        </select>    
+        </select>
+        <!-- <label for="countryDataList" class="form-label">Search Below:</label>
+        <input class="form-control" list="datalistOptions" id="countryDataList" placeholder="Type to search...">  
+        <datalist id="datalistOptions">
+
+        </datalist>   -->
         </div>
     </body>
 </html>

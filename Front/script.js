@@ -14,6 +14,7 @@ var currencyName;
 var currencySymbol;
 var currencyCode;
 var languages;
+var boundingBox = {};
 
 var initialLocationData = {
     lat:"",
@@ -91,8 +92,9 @@ function loadMap () {
     L.marker([lat, lng]).addTo(map)
         .bindPopup(`Found you! Click <a href="#countryinfo" data-bs-toggle="offcanvas" class="mylinks">Info</a> to find out more</p>`).openPopup();
         L.circle([lat, lng], {radius: 500}).addTo(map);
+
         function getDataFromCoordinates (lat, lng) {
-    var contactOpenCage = fetchAjax(
+        var contactOpenCage = fetchAjax(
         'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/openCage.php',
         {
             lat,
@@ -107,8 +109,7 @@ function loadMap () {
         $("#country").html(`${initialLocationData.countryName}`)
 
         getFromRestCountries(initialLocationData.isoA2)
-        console.log(initialLocationData.isoA2)
-        drawCountryBorders(initialLocationData.isoA2)
+        drawInitialCountryBorders(initialLocationData.isoA2)
     }, function(err){
         console.error(`Error:${err.responseText}`)
     })
@@ -117,12 +118,29 @@ function loadMap () {
     
 }
 
+function drawInitialCountryBorders (iso) {
+    var countryBorders = fetchAjax(
+        `http://localhost/LEAFLET_PRACTICE/Leaflet/Back/geoJsonCoordinates.php`,
+        {iso}
+    );$.when(countryBorders).then(function(result){
+        //Check for previous selected country's border
+        if(mapBorder){
+            mapBorder.remove()
+        }
+        //Add empty layer to map
+        mapBorder = L.geoJson().addTo(map)
+        //Add data to layer
+        mapBorder.addData(result.data[0].coordinates); 
+    }, function(err){
+        console.log(err.responseText);
+    })
+}
+
 function drawCountryBorders (iso) {
     var countryBorders = fetchAjax(
         `http://localhost/LEAFLET_PRACTICE/Leaflet/Back/geoJsonCoordinates.php`,
         {iso}
     );$.when(countryBorders).then(function(result){
-        console.log(result)
         //Check for previous selected country's border
         if(mapBorder){
             mapBorder.remove()
@@ -132,10 +150,45 @@ function drawCountryBorders (iso) {
         //Add data to layer
         mapBorder.addData(result.data[0].coordinates);
         //Center map view on newly selected country
-        map.flyToBounds(mapBorder.getBounds())
+        boundingBox = mapBorder.getBounds();
+        map.flyToBounds(boundingBox)
         
     }, function(err){
         console.log(err.responseText);
+    })
+}
+
+function getPlacesOfInterest (bbox) {
+    var placesOfInterest = fetchAjax(
+        `http://localhost/LEAFLET_PRACTICE/Leaflet/Back/OpenTripMap.php`,
+        {
+            bbox
+        }
+    );
+    $.when(placesOfInterest).then(function(result){
+        var myFeatures = []
+
+        
+        if(layerControl){
+            featureGroup.remove()
+            layerControl.remove()
+        }
+        
+        var returnedFeatures = JSON.parse(JSON.stringify(result.data.features))
+
+        for (let i=0; i < returnedFeatures.length; i++){
+            myFeatures[i] = L.marker([returnedFeatures[i].geometry.coordinates[1], returnedFeatures[i].geometry.coordinates[0]]).bindPopup(`${returnedFeatures[i].properties.name}`)
+        }
+
+        var featureGroup = L.layerGroup(myFeatures);
+        // var overlay = {
+        //     "Features": featureGroup
+        // }
+
+        var layerControl = L.control.layers().addTo(map);
+        layerControl.addOverlay(featureGroup, "Features")
+    }, function(err){
+        console.log(err.responseText)
     })
 }
 
@@ -173,7 +226,6 @@ function getInitialWeather(latitude, longitude) {
     );
     $.when(contactOpenWeather).then(function(result){
         //Populate weather info.
-        console.log(result)
         initialLocationData.weather.description = result.data.weather[0].description;
         initialLocationData.weather.icon = result.data.weather[0].icon
         initialLocationData.weather.temp = Math.floor(result.data.main.temp)
@@ -198,7 +250,6 @@ function getCountrySelectWeather (latitude, longitude) {
     );
     $.when(contactOpenWeather).then(function(result){
         //Populate weather info.
-        console.log(result.data.main.temp)
         countrySelectData.weather.description = result.data.weather[0].description;
         countrySelectData.weather.icon = result.data.weather[0].icon
         countrySelectData.weather.temp = Math.floor(result.data.main.temp)
@@ -217,7 +268,7 @@ function updateWeatherInfo (weatherIcon, weatherDescription, weatherTemp){
     const weatherUrl = `http://openweathermap.org/img/w/${weatherIcon}.png`
     const iconElement = `<img id="wicon" src="${weatherUrl}" alt="Weather Icon"></img>`
 
-    $("#weather").html(`The weather is ${weatherDescription}${iconElement}`)
+    $("#weather").html(`Weather: ${weatherDescription}${iconElement}`)
     $("#temp").html(`Temperature: ${weatherTemp}`)
 }
 
@@ -230,7 +281,6 @@ function getFromRestCountries(iso) {
         }
     );
     $.when(contactRestCountries).then(function(result){
-        console.log(result.data[0])
         $("#flag").attr({
             src:`https://flagcdn.com/w320/${iso.toLowerCase()}.png`,
             height: '45px'
@@ -242,7 +292,6 @@ function getFromRestCountries(iso) {
         currencySymbol = result.data[0].currencies[currencyCode].symbol
         currencyName = result.data[0].currencies[currencyCode].name
         var languageKey = Object.keys(result.data[0].languages)
-        console.log(languageKey[0])
         if(languageKey.length > 1){
             languages = result.data[0].languages[languageKey[0]]
         } else {
@@ -282,7 +331,6 @@ function getCurrencyInfo(currencyCode){
         const currencyValue = result.data.rates
         $("#currencyname").html(`Currency: ${currencyName}`)
         $("#vsthedollar").html(`1 US Dollar is worth: ${currencySymbol} ${Object.values(currencyValue)}`)
-        console.log(result)
     }, function (error){
         console.log(error.responseText)
     })
@@ -298,7 +346,6 @@ function getWikiBySearchTerm (searchTerm) {
         }
     );
     $.when(contactWikiSearch).then(function (result) {
-        console.log(result)
         $("#wikiPic > img").attr('src', `${result.data[0].thumbnailImg}`)
         $("#wikiPic").attr('href', `${result.data[0].wikipediaUrl}`)
     }, function(error){
@@ -317,7 +364,10 @@ $(document).ready(function(){
         $.when(getGeoJson).then(function (result){
             for(let i= 0; i < result.data.length; i++){
                 $('#country_menu').append(
-                    `<option class="country_menu_select" value='{"iso":"${result.data[i].iso_a2}", "name":"${result.data[i].name}"}'>${result.data[i].name}</option>`)     
+                    `<option class="country_menu_select" value='{"iso":"${result.data[i].iso_a2}", "name":"${result.data[i].name}"}'>${result.data[i].name}</option>`)
+                // $('#datalistOptions').append(
+                //     `<option value= ${result.data[i].name}>`
+                // )     
             }
 
             $("#country_menu").change(function(){
@@ -338,13 +388,14 @@ $(document).ready(function(){
                         currentCountryName
                     } 
                 );$.when(contactOpenCageForward).then(function(result){
-                    console.log(result.data.results[0])
                     //Set Latitude and Longitude
                     countrySelectData.lat = result.data.results[0].geometry.lat;
                     countrySelectData.lng = result.data.results[0].geometry.lng;
                     //Populate Weather Info
                     getCountrySelectWeather(countrySelectData.lat, countrySelectData.lng)
                     getFromRestCountries(currentCountryIso)
+                    boundingBox = JSON.parse(JSON.stringify(result.data.results[0].bounds))
+                    getPlacesOfInterest(boundingBox)
                 }, function (err){
                     console.error(err.responseText)
                 }) 
