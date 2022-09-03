@@ -15,6 +15,8 @@ var currencySymbol;
 var currencyCode;
 var languages;
 var boundingBox = {};
+var layerControl;
+var featureGroup;
 
 var initialLocationData = {
     lat:"",
@@ -92,6 +94,8 @@ function loadMap () {
     L.marker([lat, lng]).addTo(map)
         .bindPopup(`Found you! Click <a href="#countryinfo" data-bs-toggle="offcanvas" class="mylinks">Info</a> to find out more</p>`).openPopup();
         L.circle([lat, lng], {radius: 500}).addTo(map);
+        layerControl = L.control.layers().addTo(map);
+        featureGroup = L.layerGroup();
 
         function getDataFromCoordinates (lat, lng) {
         var contactOpenCage = fetchAjax(
@@ -166,22 +170,52 @@ function getPlacesOfInterest (bbox) {
         }
     );
     $.when(placesOfInterest).then(function(result){
-        var myFeatures = []
 
-        var layerControl = L.control.layers().addTo(map);
-        
-        var returnedFeatures = JSON.parse(JSON.stringify(result.data.features))
-
-        for (let i=0; i < returnedFeatures.length; i++){
-            myFeatures[i] = L.marker([returnedFeatures[i].geometry.coordinates[1], returnedFeatures[i].geometry.coordinates[0]]).bindPopup(`<h6>${returnedFeatures[i].properties.name}</h6>`)
+        const wikidataUrls = [];
+        for(let i = 0; i< result.data.features.length; i++){
+            wikidataUrls.push(result.data.features[i].properties.wikidata)
         }
 
-        var featureGroup = L.layerGroup(myFeatures);
-        // var overlay = {
-        //     "Features": featureGroup
-        // }
+        function getWikipediaFromWikiData(wikiData){
+            var queryWikiData = fetchAjax('http://localhost/LEAFLET_PRACTICE/Leaflet/Back/OpenTripMap.php',
+            {
+                wikiData
+            }
+            );
+            $.when(queryWikiData).then(function(result){
+                console.log(result)
+            }, function(err){
+                console.log(err.responseText)
+            })
+        }
 
-        layerControl.addOverlay(featureGroup, "Features")
+        getWikipediaFromWikiData(wikidataUrls)
+
+        const markers = L.markerClusterGroup();
+            
+        const geojsonMarkerOptions = {
+            radius: 8,
+            fillColor: "#6d7280",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        };
+        const featureData = L.geoJSON(result.data, {
+                onEachFeature: function (feature, layer) {
+                    const content =
+                    `<h4>${feature.properties.name}</h4>`
+                    layer.bindPopup(content)
+                },
+                pointToLayer: function (feature, latlng) {
+                    return L.circleMarker(latlng, geojsonMarkerOptions);
+                },
+            });
+        
+        markers.addLayer(featureData);
+        map.addLayer(markers);
+
+    
     }, function(err){
         console.log(err.responseText)
     })
@@ -264,7 +298,7 @@ function updateWeatherInfo (weatherIcon, weatherDescription, weatherTemp){
     const iconElement = `<img id="wicon" src="${weatherUrl}" alt="Weather Icon"></img>`
 
     $("#weather").html(`Weather: ${weatherDescription}${iconElement}`)
-    $("#temp").html(`Temperature: ${weatherTemp}`)
+    $("#temp").html(`Temperature: ${weatherTemp}&#8451`)
 }
 
 //Use iso code to fetch data from RestCountries API:
@@ -295,7 +329,6 @@ function getFromRestCountries(iso) {
         $("#language > h6").html(`Language: ${languages}`)
 
         getCurrencyInfo(currencyCode)
-        getWikiBySearchTerm(result.data[0].name.common)
     }, function(error){
         console.log(error.responseText)
     })
@@ -332,21 +365,21 @@ function getCurrencyInfo(currencyCode){
 
 }
 
-function getWikiBySearchTerm (searchTerm) {
-    searchTerm = encodeURI(searchTerm)
-    var contactWikiSearch = fetchAjax(
-        'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/Wikisearch.php',
-        {
-           searchTerm
-        }
-    );
-    $.when(contactWikiSearch).then(function (result) {
-        $("#wikiPic > img").attr('src', `${result.data[0].thumbnailImg}`)
-        $("#wikiPic").attr('href', `${result.data[0].wikipediaUrl}`)
-    }, function(error){
-        console.log(error.responseText)
-    })
-}
+// function getWikiBySearchTerm (searchTerm) {
+//     searchTerm = encodeURI(searchTerm)
+//     var contactWikiSearch = fetchAjax(
+//         'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/Wikisearch.php',
+//         {
+//            searchTerm
+//         }
+//     );
+//     $.when(contactWikiSearch).then(function (result) {
+//         $("#wikiPic > img").attr('src', `${result.data[0].thumbnailImg}`)
+//         $("#wikiPic").attr('href', `${result.data[0].wikipediaUrl}`)
+//     }, function(error){
+//         console.log(error.responseText)
+//     })
+// }
 
 //Load data from GeoJson file for country select in navigation menu:
 $(document).ready(function(){

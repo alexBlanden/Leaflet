@@ -1,5 +1,7 @@
 <?php
-$app_id = '08e12f9584c54dbea5f0499c0022ccbd';
+
+
+$app_id = 'db91db74a2034b4a95632e22ee956a69';
 $url = "https://openexchangerates.org/api/latest.json?app_id=" . $app_id . "&symbols=" . $_REQUEST['currencyCode'];
 
 // Open CURL session:
@@ -10,6 +12,7 @@ curl_setopt($ch, CURLOPT_URL, $url);
 
 $result = curl_exec($ch);
 curl_close($ch);
+
 
 
 $decode = json_decode($result, true);

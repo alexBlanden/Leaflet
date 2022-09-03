@@ -5,7 +5,7 @@ error_reporting(E_ALL);
 
 
 
-$url='http://api.geonames.org/wikipediaSearchJSON?q=' .$_REQUEST['searchTerm'] . '&maxRows=3&username=blanden';
+$url='http://www.wikidata.org/entity/' .$_REQUEST['wikiData'];
 
 
 // Prepare curl session and store returned data as json in $decode variable:
