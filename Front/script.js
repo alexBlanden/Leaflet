@@ -94,8 +94,6 @@ function loadMap () {
     L.marker([lat, lng]).addTo(map)
         .bindPopup(`Found you! Click <a href="#countryinfo" data-bs-toggle="offcanvas" class="mylinks">Info</a> to find out more</p>`).openPopup();
         L.circle([lat, lng], {radius: 500}).addTo(map);
-        layerControl = L.control.layers().addTo(map);
-        featureGroup = L.layerGroup();
 
         function getDataFromCoordinates (lat, lng) {
         var contactOpenCage = fetchAjax(
@@ -164,34 +162,41 @@ function drawCountryBorders (iso) {
 
 function getPlacesOfInterest (bbox) {
     var placesOfInterest = fetchAjax(
-        `http://localhost/LEAFLET_PRACTICE/Leaflet/Back/OpenTripMap.php`,
+        `http://localhost/LEAFLET_PRACTICE/Leaflet/Back/getWikiBounds.php`,
         {
             bbox
         }
     );
     $.when(placesOfInterest).then(function(result){
+        console.log(result.data)
+        var resultAsJson = {
+            type: "FeatureCollection",
+            features: [
 
-        const wikidataUrls = [];
-        for(let i = 0; i< result.data.features.length; i++){
-            wikidataUrls.push(result.data.features[i].properties.wikidata)
+            ]
         }
 
-        function getWikipediaFromWikiData(wikiData){
-            var queryWikiData = fetchAjax('http://localhost/LEAFLET_PRACTICE/Leaflet/Back/OpenTripMap.php',
-            {
-                wikiData
-            }
-            );
-            $.when(queryWikiData).then(function(result){
-                console.log(result)
-            }, function(err){
-                console.log(err.responseText)
-            })
+        for(let i= 0; i < result.data.geonames.length; i++){
+            resultAsJson.features.push(
+                {
+                    type: "Feature",
+                    geometry: {
+                        type: "Point",
+                        coordinates: [result.data.geonames[i].lng, result.data.geonames[i].lat]
+                    },
+                    properties: {
+                        name: result.data.geonames[i].title,
+                        summary: result.data.geonames[i].summary,
+                        thumbnail: result.data.geonames[i].thumbnailImg,
+                        link: result.data.geonames[i].wikipediaUrl
+                    }
+                },
+            )
         }
 
-        getWikipediaFromWikiData(wikidataUrls)
+        console.log(resultAsJson)
 
-        const markers = L.markerClusterGroup();
+        let markers = L.markerClusterGroup();
             
         const geojsonMarkerOptions = {
             radius: 8,
@@ -201,17 +206,24 @@ function getPlacesOfInterest (bbox) {
             opacity: 1,
             fillOpacity: 0.8
         };
-        const featureData = L.geoJSON(result.data, {
+        const featureData = L.geoJSON(resultAsJson, {
                 onEachFeature: function (feature, layer) {
                     const content =
-                    `<h4>${feature.properties.name}</h4>`
+                    `<h6>${feature.properties.name}</h6>
+                    <p>${feature.properties.summary}</p>
+                    <a href="${feature.properties.link}"><img src=${feature.properties.thumbnail}></img></a>`
                     layer.bindPopup(content)
                 },
                 pointToLayer: function (feature, latlng) {
                     return L.circleMarker(latlng, geojsonMarkerOptions);
                 },
             });
-        
+        while(resultAsJson.features.length > 0){
+            resultAsJson.features.pop();
+            }
+        if(markers.getLayers().length > 0){
+            markers.clearLayers()
+        }
         markers.addLayer(featureData);
         map.addLayer(markers);
 

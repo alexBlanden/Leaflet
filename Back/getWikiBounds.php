@@ -14,13 +14,14 @@ $dotenv->load();
 // $open_cage_API = $_ENV['open_cage_API'];
 
 
-$maxLat = $_REQUEST['bbox']['northeast']['lat'];
-$minLat = $_REQUEST['bbox']['southwest']['lat'];
+//Maximum and Minimum Latitude and Longitude required for bounds box
+$north = $_REQUEST['bbox']['northeast']['lat'];
+$south = $_REQUEST['bbox']['southwest']['lat'];
 
-$maxLng = $_REQUEST['bbox']['northeast']['lng'];
-$minLng = $_REQUEST['bbox']['southwest']['lng'];
+$east = $_REQUEST['bbox']['northeast']['lng'];
+$west = $_REQUEST['bbox']['southwest']['lng'];
 
-$url = 'https://api.opentripmap.com/0.1/en/places/bbox?lon_min='.$minLng.'&lon_max='.$maxLng.'&lat_min='.$minLat.'&lat_max='.$maxLat.'&limit=20&apikey=5ae2e3f221c38a28845f05b648fd673fc25eff16db05ce748bf5683f';
+$url = 'http://api.geonames.org/wikipediaBoundingBoxJSON?north='.$north.'&south='.$south.'&east='.$east.'&west='.$west.'&username=blanden';
 
 
 //Curl Session:
@@ -38,7 +39,7 @@ $decode = json_decode($result, true);
 
 
 $output['status']['code'] = '200';
-$output['status']['name'] = 'openTripMapResult';
+$output['status']['name'] = 'wikiBoundsResult';
 $output['status']['description'] = 'success';
 $output['data'] = $decode;
 
