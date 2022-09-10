@@ -51,27 +51,21 @@ var countrySelectLng
 var countrySelectIso
 
 var mapBorder = null;
-
+let markers = null;
 
 
 //If getCurrentPosition is successful, load as appropriate. If not, display error for user 
 const success = (position) => {
+    //assign initial location data coordinates
     initialLocationData.lat =  position.coords.latitude;
     initialLocationData.lng = position.coords.longitude;
-    console.log(initialLocationData.lat)
-    console.log(initialLocationData.lng)
-
+    //Call loadMap(line 84)
     loadMap()
 
-    
-    // getLocationFromCoordinates();
-   function getData(){
-        getInitialWeather(initialLocationData.lat, initialLocationData.lng);
-        getDataFromCoordinates(initialLocationData.lat, initialLocationData.lng);
-    }
-
-    getData()
-
+   
+    //Take initial location coordinates and return weather for that location (line 261):
+    getInitialWeather(initialLocationData.lat, initialLocationData.lng);
+    getDataFromCoordinates(initialLocationData.lat, initialLocationData.lng);
 }
 const fail = (error) => {
     document.getElementById("map").innerHTML =
@@ -81,10 +75,12 @@ const fail = (error) => {
 //Use Navigator object method to determine user's latitude and longitude
 navigator.geolocation.getCurrentPosition(success, fail)
 
-//loadMap called as part of success callback
+//loadMap called as part of success callback uses initial location to get country borders and rest coutries api data
 function loadMap () {
+    //Save intial coordinates as local variables
     const lat = initialLocationData.lat;
     const lng = initialLocationData.lng; 
+    //Assign map layer to global variable and attach popup to location
     map = L.map("map").setView([lat, lng], 5)
     L.tileLayer('https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=gce3UfFmnaOupUCQzm4b',
     {
@@ -95,6 +91,7 @@ function loadMap () {
         .bindPopup(`Found you! Click <a href="#countryinfo" data-bs-toggle="offcanvas" class="mylinks">Info</a> to find out more</p>`).openPopup();
         L.circle([lat, lng], {radius: 500}).addTo(map);
 
+        //Returns country iso and name, uses iso to draw intial country border and get population facts        
         function getDataFromCoordinates (lat, lng) {
         var contactOpenCage = fetchAjax(
         'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/openCage.php',
@@ -105,13 +102,20 @@ function loadMap () {
     );
     $.when(contactOpenCage).then(function(result){
         //saves iso and country name from returned data
+        console.log(result)
         initialLocationData.isoA2 = result.data.results[0].components.country_code;
         initialLocationData.countryName = result.data.results[0].components.state;
 
         $("#country").html(`${initialLocationData.countryName}`)
 
+        //Defined on line 318
         getFromRestCountries(initialLocationData.isoA2)
+        //Defined on line 125
         drawInitialCountryBorders(initialLocationData.isoA2)
+        // const initialBoundingBox = JSON.parse(JSON.stringify(result.data.results[0].bounds))
+        // console.log(initialBoundingBox)
+        // //Line 167
+        // getPlacesOfInterest(initialBoundingBox)
     }, function(err){
         console.error(`Error:${err.responseText}`)
     })
@@ -132,7 +136,10 @@ function drawInitialCountryBorders (iso) {
         //Add empty layer to map
         mapBorder = L.geoJson().addTo(map)
         //Add data to layer
-        mapBorder.addData(result.data[0].coordinates); 
+        mapBorder.addData(result.data[0].coordinates);
+        initialBoundingBox = JSON.parse(JSON.stringify(mapBorder.getBounds()))
+        console.log(initialBoundingBox)
+        getPlacesOfInterest(initialBoundingBox) 
     }, function(err){
         console.log(err.responseText);
     })
@@ -160,6 +167,7 @@ function drawCountryBorders (iso) {
     })
 }
 
+//Query wiki API for features within boundary Box
 function getPlacesOfInterest (bbox) {
     var placesOfInterest = fetchAjax(
         `http://localhost/LEAFLET_PRACTICE/Leaflet/Back/getWikiBounds.php`,
@@ -169,13 +177,14 @@ function getPlacesOfInterest (bbox) {
     );
     $.when(placesOfInterest).then(function(result){
         console.log(result.data)
+        //result needs to be geoJson
         var resultAsJson = {
             type: "FeatureCollection",
             features: [
 
             ]
         }
-
+        //For loop pushes geojson objects to resultAsJson array
         for(let i= 0; i < result.data.geonames.length; i++){
             resultAsJson.features.push(
                 {
@@ -196,7 +205,8 @@ function getPlacesOfInterest (bbox) {
 
         console.log(resultAsJson)
 
-        let markers = L.markerClusterGroup();
+       //Create markers layer  
+       markers = L.markerClusterGroup();
             
         const geojsonMarkerOptions = {
             radius: 8,
@@ -206,24 +216,28 @@ function getPlacesOfInterest (bbox) {
             opacity: 1,
             fillOpacity: 0.8
         };
+        //Take each feature in resultAsJson, add html and bind popup
         const featureData = L.geoJSON(resultAsJson, {
                 onEachFeature: function (feature, layer) {
                     const content =
-                    `<h6>${feature.properties.name}</h6>
+                    `
+                    <h6 class="text-center"><a href="${feature.properties.link}">${feature.properties.name}</h6>
                     <p>${feature.properties.summary}</p>
-                    <a href="${feature.properties.link}"><img src=${feature.properties.thumbnail}></img></a>`
+                    <a href="${feature.properties.link}"><img src=${feature.properties.thumbnail}></img></a>
+                    `
                     layer.bindPopup(content)
                 },
                 pointToLayer: function (feature, latlng) {
                     return L.circleMarker(latlng, geojsonMarkerOptions);
                 },
             });
+        if(markers){
+            markers.clearLayers()
+            }
+            
         while(resultAsJson.features.length > 0){
             resultAsJson.features.pop();
             }
-        if(markers.getLayers().length > 0){
-            markers.clearLayers()
-        }
         markers.addLayer(featureData);
         map.addLayer(markers);
 
@@ -248,13 +262,12 @@ function getDataFromCoordinates (lat, lng) {
         initialLocationData.countryName = result.data.results[0].components.state
 
         $("#country").html(`${initialLocationData.countryName}`)
-
+        //Line 318
         getFromRestCountries(initialLocationData.isoA2)
     }, function(err){
         console.error(`Error:${err.responseText}`)
     })
 };
-
 
 //Uses coordinates to get weather info for user lat/lng
 function getInitialWeather(latitude, longitude) {
@@ -313,7 +326,7 @@ function updateWeatherInfo (weatherIcon, weatherDescription, weatherTemp){
     $("#temp").html(`Temperature: ${weatherTemp}&#8451`)
 }
 
-//Use iso code to fetch data from RestCountries API:
+//Use iso code to fetch data from RestCountries API, uses currency code to get data from currency api:
 function getFromRestCountries(iso) {
     var contactRestCountries = fetchAjax(
         'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/RestCountries.php',
@@ -345,6 +358,7 @@ function getFromRestCountries(iso) {
         console.log(error.responseText)
     })
 }
+//Utility function
 function conovertPopulationToString(number) {
     const string = number.toString()
     const length = string.length
@@ -376,23 +390,6 @@ function getCurrencyInfo(currencyCode){
     })
 
 }
-
-// function getWikiBySearchTerm (searchTerm) {
-//     searchTerm = encodeURI(searchTerm)
-//     var contactWikiSearch = fetchAjax(
-//         'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/Wikisearch.php',
-//         {
-//            searchTerm
-//         }
-//     );
-//     $.when(contactWikiSearch).then(function (result) {
-//         $("#wikiPic > img").attr('src', `${result.data[0].thumbnailImg}`)
-//         $("#wikiPic").attr('href', `${result.data[0].wikipediaUrl}`)
-//     }, function(error){
-//         console.log(error.responseText)
-//     })
-// }
-
 //Load data from GeoJson file for country select in navigation menu:
 $(document).ready(function(){
         var getGeoJson = fetchAjax(
@@ -434,8 +431,10 @@ $(document).ready(function(){
                     //Populate Weather Info
                     getCountrySelectWeather(countrySelectData.lat, countrySelectData.lng)
                     getFromRestCountries(currentCountryIso)
-                    boundingBox = JSON.parse(JSON.stringify(result.data.results[0].bounds))
-                    getPlacesOfInterest(boundingBox)
+                    initialBoundingBox = JSON.parse(JSON.stringify(mapBorder.getBounds()))
+        
+                    getPlacesOfInterest(initialBoundingBox)
+                    
                 }, function (err){
                     console.error(err.responseText)
                 }) 
@@ -446,6 +445,10 @@ $(document).ready(function(){
         })
 
 });
+
+$("#layers").click(function (){
+    markers.clearLayers()
+})
   
 
 
@@ -458,6 +461,10 @@ $(document).ready(function(){
     $('#map').mouseover(function(){
         $("#map, nav").css("filter","");
     })
+
+    $('#map').on({'touchstart' : function(){
+        $("#map, nav").css("filter","");
+    }})
 
     $('.btn-close').click(function(){
         $("#map, nav").css("filter","");

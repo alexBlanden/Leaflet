@@ -9,19 +9,31 @@ require __DIR__ . '\vendor\autoload.php';
 $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-// $map_tiler_API = $_ENV['map_tiler_API'];
 
-// $open_cage_API = $_ENV['open_cage_API'];
-
+// $testData = json_decode($_REQUEST['bbox']);
 
 //Maximum and Minimum Latitude and Longitude required for bounds box
-$north = $_REQUEST['bbox']['northeast']['lat'];
-$south = $_REQUEST['bbox']['southwest']['lat'];
+$north;
+$south;
+$east;
+$west;
 
-$east = $_REQUEST['bbox']['northeast']['lng'];
-$west = $_REQUEST['bbox']['southwest']['lng'];
 
-$url = 'http://api.geonames.org/wikipediaBoundingBoxJSON?north='.$north.'&south='.$south.'&east='.$east.'&west='.$west.'&username=blanden';
+if (array_key_exists('_northEast',$_REQUEST['bbox'])){
+    $north = $_REQUEST['bbox']['_northEast']['lat'];
+    $south = $_REQUEST['bbox']['_southWest']['lat'];
+
+    $east = $_REQUEST['bbox']['_northEast']['lng'];
+    $west = $_REQUEST['bbox']['_southWest']['lng'];
+} else {
+    $north = $_REQUEST['bbox']['northeast']['lat'];
+    $south = $_REQUEST['bbox']['southwest']['lat'];
+
+    $east = $_REQUEST['bbox']['northeast']['lng'];
+    $west = $_REQUEST['bbox']['southwest']['lng'];
+}
+
+$url = 'http://api.geonames.org/wikipediaBoundingBoxJSON?north='.$north.'&south='.$south.'&east='.$east.'&west='.$west.'&username=blanden&style=full&maxRows=100';
 
 
 //Curl Session:
@@ -48,5 +60,6 @@ header('Content-Type: application/json; charset=UTF-8');
 
 // echo (json_encode($_REQUEST['bbox']))
 echo json_encode($output);
+// echo($data);
 
 ?>
