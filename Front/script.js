@@ -85,16 +85,17 @@ function loadMap () {
     L.tileLayer('https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=gce3UfFmnaOupUCQzm4b',
     {
     maxZoom: 19,
-    attribution: 'OpenStreetMap'
+    attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
+    style: 'https://api.maptiler.com/maps/basic-v2/style.json?key=gce3UfFmnaOupUCQzm4b'
     }).addTo(map);
     L.marker([lat, lng]).addTo(map)
-        .bindPopup(`Found you! Click <a href="#countryinfo" data-bs-toggle="offcanvas" class="mylinks">Info</a> to find out more</p>`).openPopup();
+        .bindPopup(`<h6>Found you!</h6><ul><li>The info button gives general country info</li><li>Navigation takes you somewhere else</li><li>The markers on the map show country features and their wikipedia entries</li></ul> `).openPopup();
         L.circle([lat, lng], {radius: 500}).addTo(map);
 
         //Returns country iso and name, uses iso to draw intial country border and get population facts        
         function getDataFromCoordinates (lat, lng) {
         var contactOpenCage = fetchAjax(
-        'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/openCage.php',
+        'Back/OpenCage.php',
         {
             lat,
             lng
@@ -102,7 +103,6 @@ function loadMap () {
     );
     $.when(contactOpenCage).then(function(result){
         //saves iso and country name from returned data
-        console.log(result)
         initialLocationData.isoA2 = result.data.results[0].components.country_code;
         initialLocationData.countryName = result.data.results[0].components.state;
 
@@ -112,10 +112,6 @@ function loadMap () {
         getFromRestCountries(initialLocationData.isoA2)
         //Defined on line 125
         drawInitialCountryBorders(initialLocationData.isoA2)
-        // const initialBoundingBox = JSON.parse(JSON.stringify(result.data.results[0].bounds))
-        // console.log(initialBoundingBox)
-        // //Line 167
-        // getPlacesOfInterest(initialBoundingBox)
     }, function(err){
         console.error(`Error:${err.responseText}`)
     })
@@ -126,7 +122,7 @@ function loadMap () {
 
 function drawInitialCountryBorders (iso) {
     var countryBorders = fetchAjax(
-        `http://localhost/LEAFLET_PRACTICE/Leaflet/Back/geoJsonCoordinates.php`,
+        `Back/geoJsonCoordinates.php`,
         {iso}
     );$.when(countryBorders).then(function(result){
         //Check for previous selected country's border
@@ -138,7 +134,6 @@ function drawInitialCountryBorders (iso) {
         //Add data to layer
         mapBorder.addData(result.data[0].coordinates);
         initialBoundingBox = JSON.parse(JSON.stringify(mapBorder.getBounds()))
-        console.log(initialBoundingBox)
         getPlacesOfInterest(initialBoundingBox) 
     }, function(err){
         console.log(err.responseText);
@@ -147,7 +142,7 @@ function drawInitialCountryBorders (iso) {
 
 function drawCountryBorders (iso) {
     var countryBorders = fetchAjax(
-        `http://localhost/LEAFLET_PRACTICE/Leaflet/Back/geoJsonCoordinates.php`,
+        `Back/geoJsonCoordinates.php`,
         {iso}
     );$.when(countryBorders).then(function(result){
         //Check for previous selected country's border
@@ -170,13 +165,12 @@ function drawCountryBorders (iso) {
 //Query wiki API for features within boundary Box
 function getPlacesOfInterest (bbox) {
     var placesOfInterest = fetchAjax(
-        `http://localhost/LEAFLET_PRACTICE/Leaflet/Back/getWikiBounds.php`,
+        `Back/getWikiBounds.php`,
         {
             bbox
         }
     );
     $.when(placesOfInterest).then(function(result){
-        console.log(result.data)
         //result needs to be geoJson
         var resultAsJson = {
             type: "FeatureCollection",
@@ -202,9 +196,6 @@ function getPlacesOfInterest (bbox) {
                 },
             )
         }
-
-        console.log(resultAsJson)
-
        //Create markers layer  
        markers = L.markerClusterGroup();
             
@@ -221,9 +212,8 @@ function getPlacesOfInterest (bbox) {
                 onEachFeature: function (feature, layer) {
                     const content =
                     `
-                    <h6 class="text-center"><a href="${feature.properties.link}">${feature.properties.name}</h6>
+                    <h6 class="text-center"><a href="https://${feature.properties.link}" class="link-primary" target="_blank">${feature.properties.name}</h6></a>
                     <p>${feature.properties.summary}</p>
-                    <a href="${feature.properties.link}"><img src=${feature.properties.thumbnail}></img></a>
                     `
                     layer.bindPopup(content)
                 },
@@ -250,7 +240,7 @@ function getPlacesOfInterest (bbox) {
 //Uses latitude and longitude to add data to initialLocation object
 function getDataFromCoordinates (lat, lng) {
     var contactOpenCage = fetchAjax(
-        'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/openCage.php',
+        'Back/openCage.php',
         {
             lat,
             lng
@@ -272,7 +262,7 @@ function getDataFromCoordinates (lat, lng) {
 //Uses coordinates to get weather info for user lat/lng
 function getInitialWeather(latitude, longitude) {
     var contactOpenWeather = fetchAjax (
-        'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/OpenWeather.php',
+        'Back/OpenWeather.php',
         {
             latitude,
             longitude
@@ -296,7 +286,7 @@ function getInitialWeather(latitude, longitude) {
 
 function getCountrySelectWeather (latitude, longitude) {
     var contactOpenWeather = fetchAjax (
-        'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/OpenWeather.php',
+        'Back/OpenWeather.php',
         {
             latitude,
             longitude
@@ -329,7 +319,7 @@ function updateWeatherInfo (weatherIcon, weatherDescription, weatherTemp){
 //Use iso code to fetch data from RestCountries API, uses currency code to get data from currency api:
 function getFromRestCountries(iso) {
     var contactRestCountries = fetchAjax(
-        'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/RestCountries.php',
+        'Back/RestCountries.php',
         {
             iso
         }
@@ -376,7 +366,7 @@ function conovertPopulationToString(number) {
 }
 
 function getCurrencyInfo(currencyCode){
-    var contactOpenExchange = fetchAjax('http://localhost/LEAFLET_PRACTICE/Leaflet/Back/ExchangeRates.php',
+    var contactOpenExchange = fetchAjax('Back/ExchangeRates.php',
     {
         currencyCode
     }
@@ -393,7 +383,7 @@ function getCurrencyInfo(currencyCode){
 //Load data from GeoJson file for country select in navigation menu:
 $(document).ready(function(){
         var getGeoJson = fetchAjax(
-            'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/geoJsonQuery.php',
+            'Back/geoJsonQuery.php',
             {
                 
             }
@@ -420,7 +410,7 @@ $(document).ready(function(){
                 
                 //Perform forward Geocoding using country name
                 var contactOpenCageForward = fetchAjax(
-                    'http://localhost/LEAFLET_PRACTICE/Leaflet/Back/ForwardOpenCage.php',
+                    'Back/ForwardOpenCage.php',
                     {
                         currentCountryName
                     } 
@@ -447,7 +437,7 @@ $(document).ready(function(){
 });
 
 $("#layers").click(function (){
-    markers.clearLayers()
+    markers.removelayer(featureData)
 })
   
 

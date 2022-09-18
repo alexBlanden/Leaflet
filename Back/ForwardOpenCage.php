@@ -11,10 +11,10 @@ $dotenv->load();
 
 // $map_tiler_API = $_ENV['map_tiler_API'];
 
-// $open_cage_API = $_ENV['open_cage_API'];
+$openCageAPI = $_ENV['open_cage_API'];
 
 // //Plain Url for tsting purposes:
-$url = 'https://api.opencagedata.com/geocode/v1/json?q='.$_REQUEST['currentCountryName'].'&key=67db27e8a6694f80b31ed9eec629c0d1';    
+$url = 'https://api.opencagedata.com/geocode/v1/json?q='.$_REQUEST['currentCountryName'].'&key='.$openCageAPI;    
 
         // ______________________
 
