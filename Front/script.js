@@ -240,7 +240,7 @@ function getPlacesOfInterest (bbox) {
 //Uses latitude and longitude to add data to initialLocation object
 function getDataFromCoordinates (lat, lng) {
     var contactOpenCage = fetchAjax(
-        'Back/openCage.php',
+        'Back/OpenCage.php',
         {
             lat,
             lng
