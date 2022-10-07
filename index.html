@@ -44,45 +44,64 @@
                     <a href="" class="btn btn-secondary" id="layers">Clear Markers</a>
                 </form>
             </nav>
-            <div class="modal" tabindex="-1" id="modal">
+            <div class="modal" tabindex="-1" id="countryModal">
                 <div class="modal-dialog">
                   <div class="modal-content">
                     <div class="modal-header">
-                      <h5 class="modal-title">Modal title</h5>
+                      <h5 class="modal-title" id="country"></h5>
+                      <img src="" alt="" id="flag">
                       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                      <p>Modal body text goes here.</p>
+                        <div id="factscontainer">
+                            <ul>
+                                <li id="population"><h6>Population:</h6></li>
+                                <li id="capitalcity"><h6>Capital City:</h6></li>
+                                <li id="language"><h6>Language:</h6></li>
+                                <li id="region"><h6>Region</h6></li>
+                            </ul>
+                        </div>
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                      <button type="button" class="btn btn-primary">Save changes</button>
                     </div>
                   </div>
                 </div>
               </div>
             <div id="map" class="rounded"></div> 
         </div>
+
+        <div class="modal" tabindex="-1" id="weatherModal">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="country"></h5>
+                  <img src="" alt="" id="flag">
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul>
+                        <li id="temp"></li>
+                        <li id="weather"><img id="wicon" src="" alt="Weather Icon"></li>
+                    </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        <div id="map" class="rounded"></div> 
+    </div>
                 <!-- </main> -->
         <!-- offcanvas -->
         <div class="offcanvas offcanvas-start overflow-auto" tabindex="-1" id="countryinfo" aria-labelledby="sidebar-label">
-            <div class="offcanvas-header">
-                <h2 class="offcanvas-title" id="country"></h2>
-                <img src="" alt="" id="flag">
-                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
-            </div>
-            <div id="factscontainer">
-                <ul>
-                    <li id="population"><h6>Population:</h6></li>
-                    <li id="capitalcity"><h6>Capital City:</h6></li>
-                    <li id="language"><h6>Language:</h6></li>
-                </ul>
-            </div>
             <div id="weathercontainer">
-                <ul>
+                <!-- <ul>
                     <li id="temp"></li>
                     <li id="weather"><img id="wicon" src="" alt="Weather Icon"></li>
-                </ul>
+                </ul> -->
             </div>
             <div id="currencyContainer">
                 <li id="currencyname"></li>
@@ -99,9 +118,9 @@
               
         </select>
         </div>
-        <script src="Front/script.js"></script>
         <script src="Front/node_modules/leaflet-easybutton/src/easy-button.js"></script>
         <script src="https://kit.fontawesome.com/8b56d6a893.js" crossorigin="anonymous"></script>
         <script src="Front/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     </body>
+    <script src="Front/script.js"></script>
 </html>

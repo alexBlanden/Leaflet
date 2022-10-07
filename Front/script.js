@@ -16,7 +16,8 @@ var mapStyle = {
     "color": "black",
     "dashArray": "20,10,5,5,5,10"
 }
-var modal = new bootstrap.Modal($('#modal'));
+var countryModal = new bootstrap.Modal($('#countryModal'));
+var weatherModal = new bootstrap.Modal($('#weatherModal'));
 
 var currencyName;
 var currencySymbol;
@@ -86,13 +87,12 @@ function loadEasyButtons () {
     var helloPopup = L.popup().setContent('Hello World!');
 
     L.easyButton('fa-globe', function(btn, map) {
-        modal.toggle();
+        countryModal.toggle();
     }).addTo(map)
 
     L.easyButton('fa-sun', function (btn, map){
-        const myModal= new boostrap.Modal($('#myModal'))
+        weatherModal.toggle()
 
-        myModal.show()
     }).addTo(map)
 
     L.easyButton('fa-dollar', function (btn, map){
@@ -218,6 +218,10 @@ function getPlacesOfInterest (bbox) {
         }
     );
     $.when(placesOfInterest).then(function(result){
+        console.log(result.data)
+        if(result.data == undefined){
+            alert("Sorry Places of interest API unavailable")
+        }
         //result needs to be geoJson
         var resultAsJson = {
             type: "FeatureCollection",
@@ -320,6 +324,7 @@ function getCountrySelectWeather (latitude, longitude) {
         }
     );
     $.when(contactOpenWeather).then(function(result){
+        console.log(result)
         //Populate weather info.
         countrySelectData.weather.description = result.data.weather[0].description;
         countrySelectData.weather.icon = result.data.weather[0].icon
@@ -327,7 +332,8 @@ function getCountrySelectWeather (latitude, longitude) {
         updateWeatherInfo(
             countrySelectData.weather.icon, 
             countrySelectData.weather.description,
-            countrySelectData.weather.temp
+            countrySelectData.weather.temp,
+            countrySelectData.weather.sys
             )
     }, function(error){
         console.error(error.responseText)
@@ -335,12 +341,14 @@ function getCountrySelectWeather (latitude, longitude) {
     
 }
 
-function updateWeatherInfo (weatherIcon, weatherDescription, weatherTemp){
+function updateWeatherInfo (weatherIcon, weatherDescription, weatherTemp, weatherSys){
+    const date = new Date(weatherSys.sunrise * 1000)
     const weatherUrl = `http://openweathermap.org/img/w/${weatherIcon}.png`
     const iconElement = `<img id="wicon" src="${weatherUrl}" alt="Weather Icon"></img>`
 
     $("#weather").html(`Weather: ${weatherDescription}${iconElement}`)
     $("#temp").html(`Temperature: ${weatherTemp}&#8451`)
+    $('#sunrise').html(`Sunrise: ${date}`)
 }
 
 //Use iso code to fetch data from RestCountries API, uses currency code to get data from currency api:
@@ -352,6 +360,7 @@ function getFromRestCountries(iso) {
         }
     );
     $.when(contactRestCountries).then(function(result){
+        console.log(result)
         $("#flag").attr({
             src:`https://flagcdn.com/w320/${iso.toLowerCase()}.png`,
             height: '45px'
@@ -369,6 +378,7 @@ function getFromRestCountries(iso) {
             languages = result.data[0].languages[languageKey]
         }
         $("#language > h6").html(`Language: ${languages}`)
+        $('#region > h6').html(`Region: ${result.data[0].region}`)
 
         getCurrencyInfo(currencyCode)
     }, function(error){
