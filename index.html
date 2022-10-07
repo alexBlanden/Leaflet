@@ -7,8 +7,8 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>Gazeteer by Alex Blanden</title>
-        <meta name="description" content="Commercial in Confidence Gazeteer Project">
+        <title>Gazetteer by Alex Blanden</title>
+        <meta name="description" content="Commercial in Confidence Gazetteer Project">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
         <link rel="icon" href="pngegg.png">
          <!-- Leaflet.js stylesheet -->
@@ -23,18 +23,13 @@
         <link rel="stylesheet" href="Front/node_modules/leaflet.markercluster/dist/MarkerCluster.css">
         <link rel="stylesheet" href="Front/node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css">
         <script src="Front/node_modules/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
-
-        <!-- Bootstrap CDN via jsDelivr -->
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.min.js" integrity="sha384-kjU+l4N0Yf4ZOJErLsIcvOU2qSb74wXpOhqTvwVx3OElZRweTnQ6d31fXEoRD1Jy" crossorigin="anonymous"></script>
-
-        <!-- Bootstrap Popper.js -->
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js" integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk" crossorigin="anonymous"></script>
-
+        <!-- Bootstrap -->
+        <link rel="stylesheet" href="Front/node_modules/bootstrap/dist/css/bootstrap.min.css">
         <!-- JQuery -->
         <script src="Front/jquery-3.6.0.min.js"></script>
         
         <link rel="stylesheet" href="Front/style.css">
+        <link rel="stylesheet" href="Front/node_modules/leaflet-easybutton/src/easy-button.css">
     </head>
     <body>
         <!--[if lt IE 7]>
@@ -49,14 +44,26 @@
                     <a href="" class="btn btn-secondary" id="layers">Clear Markers</a>
                 </form>
             </nav>
-            <!-- <button class="APIbutton">API</button>
-            <button class="Geobutton">GeoJson</button> -->
-            
+            <div class="modal" tabindex="-1" id="modal">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Modal title</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <p>Modal body text goes here.</p>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      <button type="button" class="btn btn-primary">Save changes</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             <div id="map" class="rounded"></div> 
         </div>
                 <!-- </main> -->
-        <script src="Front/script.js"></script>
-
         <!-- offcanvas -->
         <div class="offcanvas offcanvas-start overflow-auto" tabindex="-1" id="countryinfo" aria-labelledby="sidebar-label">
             <div class="offcanvas-header">
@@ -82,8 +89,6 @@
                 <li id="vsthedollar"></li>
             </div>
         </div>
-
-
         <div class="offcanvas offcanvas-end overflow-auto" tabindex="-1" id="navigation" aria-labelledby="sidebar-label">
             <div class="offcanvas-header">
                 <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
@@ -94,5 +99,9 @@
               
         </select>
         </div>
+        <script src="Front/script.js"></script>
+        <script src="Front/node_modules/leaflet-easybutton/src/easy-button.js"></script>
+        <script src="https://kit.fontawesome.com/8b56d6a893.js" crossorigin="anonymous"></script>
+        <script src="Front/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>

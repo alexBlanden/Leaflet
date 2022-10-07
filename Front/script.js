@@ -8,7 +8,15 @@ var fetchAjax = function (address, query) {
 }
 
 
-var map;
+var map = L.map("map");
+var mapStyle = {
+    "fillColor": "#999595",
+    "weight": 3,
+    "opacity": 0.7,
+    "color": "black",
+    "dashArray": "20,10,5,5,5,10"
+}
+var modal = new bootstrap.Modal($('#modal'));
 
 var currencyName;
 var currencySymbol;
@@ -59,29 +67,48 @@ const success = (position) => {
     //assign initial location data coordinates
     initialLocationData.lat =  position.coords.latitude;
     initialLocationData.lng = position.coords.longitude;
-    //Call loadMap(line 84)
-    loadMap()
 
-   
-    //Take initial location coordinates and return weather for that location (line 261):
-    getInitialWeather(initialLocationData.lat, initialLocationData.lng);
-    getDataFromCoordinates(initialLocationData.lat, initialLocationData.lng);
+    loadLocation()
+    loadEasyButtons();
+
+    getInitialWeather(initialLocationData.lat,initialLocationData.lng);
+    getDataFromCoordinates(initialLocationData.lat,initialLocationData.lng);
 }
 const fail = (error) => {
-    document.getElementById("map").innerHTML =
-        "Geolocation is not supported by this browser."
-    console.log(error)
+    loadMap();
+    // getDataFromCoordinates(50.8476, 4.3572);
+    getCountrySelectWeather(50.8476, 4.3572);
+    drawInitialCountryBorders('BE');
+    loadEasyButtons();
+}
+
+function loadEasyButtons () {
+    var helloPopup = L.popup().setContent('Hello World!');
+
+    L.easyButton('fa-globe', function(btn, map) {
+        modal.toggle();
+    }).addTo(map)
+
+    L.easyButton('fa-sun', function (btn, map){
+        const myModal= new boostrap.Modal($('#myModal'))
+
+        myModal.show()
+    }).addTo(map)
+
+    L.easyButton('fa-dollar', function (btn, map){
+
+    }).addTo(map)
+
+
 }
 //Use Navigator object method to determine user's latitude and longitude
 navigator.geolocation.getCurrentPosition(success, fail)
 
-//loadMap called as part of success callback uses initial location to get country borders and rest coutries api data
+
 function loadMap () {
-    //Save intial coordinates as local variables
-    const lat = initialLocationData.lat;
-    const lng = initialLocationData.lng; 
-    //Assign map layer to global variable and attach popup to location
-    map = L.map("map").setView([lat, lng], 5)
+    const lat = 50.8476;
+    const lng = 4.3572;
+    map.setView([lat, lng], 5)
     L.tileLayer('https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=gce3UfFmnaOupUCQzm4b',
     {
     maxZoom: 19,
@@ -89,36 +116,57 @@ function loadMap () {
     style: 'https://api.maptiler.com/maps/basic-v2/style.json?key=gce3UfFmnaOupUCQzm4b'
     }).addTo(map);
     L.marker([lat, lng]).addTo(map)
-        .bindPopup(`<h6>Found you!</h6><ul><li>The info button gives general country info</li><li>Navigation takes you somewhere else</li><li>The markers on the map show country features and their wikipedia entries</li></ul> `).openPopup();
+        .bindPopup(`Location unknown! Use the buttons on the right to find out more`).openPopup();
         L.circle([lat, lng], {radius: 500}).addTo(map);
-
-        //Returns country iso and name, uses iso to draw intial country border and get population facts        
-        function getDataFromCoordinates (lat, lng) {
-        var contactOpenCage = fetchAjax(
-        'Back/OpenCage.php',
-        {
-            lat,
-            lng
-        }
-    );
-    $.when(contactOpenCage).then(function(result){
-        //saves iso and country name from returned data
-        initialLocationData.isoA2 = result.data.results[0].components.country_code;
-        initialLocationData.countryName = result.data.results[0].components.state;
-
-        $("#country").html(`${initialLocationData.countryName}`)
-
-        //Defined on line 318
-        getFromRestCountries(initialLocationData.isoA2)
-        //Defined on line 125
-        drawInitialCountryBorders(initialLocationData.isoA2)
-    }, function(err){
-        console.error(`Error:${err.responseText}`)
-    })
-    };
-    getDataFromCoordinates(initialLocationData.lat, initialLocationData.lng)
     
 }
+//loadMap called as part of success callback uses initial location to get country borders and rest coutries api data
+function loadLocation () {
+    //Save intial coordinates as local variables
+    const lat = initialLocationData.lat;
+    const lng = initialLocationData.lng; 
+
+    //Assign map layer to global variable and attach popup to location
+    map.setView([lat, lng], 5)
+    L.tileLayer('https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=gce3UfFmnaOupUCQzm4b',
+    {
+    maxZoom: 19,
+    attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
+    style: 'https://api.maptiler.com/maps/basic-v2/style.json?key=gce3UfFmnaOupUCQzm4b'
+    }).addTo(map);
+    L.marker([lat, lng]).addTo(map)
+        .bindPopup(`Found you! Use the buttons on the right to find out more`).openPopup();
+        L.circle([lat, lng], {radius: 500}).addTo(map);
+
+        //Returns country iso and name, uses iso to draw intial country border and get population fact
+    
+}
+
+function getDataFromCoordinates(lat,lng) {
+    console.log('starting getData')
+    var contactOpenCage = fetchAjax(
+    'Back/OpenCage.php',
+    {
+        lat,
+        lng
+    }
+);
+$.when(contactOpenCage).then(function(result){
+    //saves iso and country name from returned data
+    console.log(result)
+    initialLocationData.isoA2 = result.data.results[0].components.country_code;
+    initialLocationData.countryName = result.data.results[0].components.state;
+
+    $("#country").html(`${initialLocationData.countryName}`)
+
+    //Defined on line 318
+    getFromRestCountries(initialLocationData.isoA2)
+    //Defined on line 125
+    drawInitialCountryBorders(initialLocationData.isoA2)
+}, function(err){
+    console.error(`Error:${err.responseText}`)
+})
+};
 
 function drawInitialCountryBorders (iso) {
     var countryBorders = fetchAjax(
@@ -129,10 +177,9 @@ function drawInitialCountryBorders (iso) {
         if(mapBorder){
             mapBorder.remove()
         }
-        //Add empty layer to map
-        mapBorder = L.geoJson().addTo(map)
-        //Add data to layer
-        mapBorder.addData(result.data[0].coordinates);
+        mapBorder = L.geoJson(result.data[0].coordinates, {style: 
+            mapStyle
+        }).addTo(map)
         initialBoundingBox = JSON.parse(JSON.stringify(mapBorder.getBounds()))
         getPlacesOfInterest(initialBoundingBox) 
     }, function(err){
@@ -149,10 +196,10 @@ function drawCountryBorders (iso) {
         if(mapBorder){
             mapBorder.remove()
         }
-        //Add empty layer to map
-        mapBorder = L.geoJson().addTo(map)
-        //Add data to layer
-        mapBorder.addData(result.data[0].coordinates);
+
+        mapBorder = L.geoJson(result.data[0].coordinates, {style: 
+            mapStyle
+        }).addTo(map)
         //Center map view on newly selected country
         boundingBox = mapBorder.getBounds();
         map.flyToBounds(boundingBox)
@@ -238,26 +285,6 @@ function getPlacesOfInterest (bbox) {
 }
 
 //Uses latitude and longitude to add data to initialLocation object
-function getDataFromCoordinates (lat, lng) {
-    var contactOpenCage = fetchAjax(
-        'Back/OpenCage.php',
-        {
-            lat,
-            lng
-        }
-    );
-    $.when(contactOpenCage).then(function(result){
-        //saves iso and country name from returned data
-        initialLocationData.isoA2 = result.data.results[0].components.country_code;
-        initialLocationData.countryName = result.data.results[0].components.state
-
-        $("#country").html(`${initialLocationData.countryName}`)
-        //Line 318
-        getFromRestCountries(initialLocationData.isoA2)
-    }, function(err){
-        console.error(`Error:${err.responseText}`)
-    })
-};
 
 //Uses coordinates to get weather info for user lat/lng
 function getInitialWeather(latitude, longitude) {
@@ -439,7 +466,6 @@ $(document).ready(function(){
 $("#layers").click(function (){
     markers.removelayer(featureData)
 })
-  
 
 
 // CSS blur effect:
