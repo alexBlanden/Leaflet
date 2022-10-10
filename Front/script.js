@@ -38,6 +38,8 @@ var initialLocationData = {
         icon: "",
         temp: ""
     },
+    sunUp: null,
+    sunDown: null,
     currencyCode: ""
 }
 
@@ -52,6 +54,8 @@ var countrySelectData = {
         icon: "",
         temp: ""
     },
+    sunUp: null,
+    sunDown: null,
     currencyCode: ""
 }
 var countrySelect
@@ -158,6 +162,7 @@ $.when(contactOpenCage).then(function(result){
     initialLocationData.countryName = result.data.results[0].components.state;
 
     $("#country").html(`${initialLocationData.countryName}`)
+    $("#drives > h6").html(`Drive on the ${result.data.results[0].annotations.roadinfo.drive_on}`)
 
     //Defined on line 318
     getFromRestCountries(initialLocationData.isoA2)
@@ -301,13 +306,18 @@ function getInitialWeather(latitude, longitude) {
     );
     $.when(contactOpenWeather).then(function(result){
         //Populate weather info.
+        console.log(result)
         initialLocationData.weather.description = result.data.weather[0].description;
         initialLocationData.weather.icon = result.data.weather[0].icon
         initialLocationData.weather.temp = Math.floor(result.data.main.temp)
+        initialLocationData.sunUp = new Date(result.data.sys.sunrise * 1000)
+        initialLocationData.sunDown = new Date (result.data.sys.sunset * 1000)
         updateWeatherInfo(
             initialLocationData.weather.icon, 
             initialLocationData.weather.description,
-            initialLocationData.weather.temp
+            initialLocationData.weather.temp,
+            initialLocationData.sunUp,
+            initialLocationData.sunDown
             )
     }, function(error){
         console.error(error.responseText)
@@ -329,11 +339,14 @@ function getCountrySelectWeather (latitude, longitude) {
         countrySelectData.weather.description = result.data.weather[0].description;
         countrySelectData.weather.icon = result.data.weather[0].icon
         countrySelectData.weather.temp = Math.floor(result.data.main.temp)
+        countrySelectData.sunUp = new Date(result.data.sys.sunrise * 1000)
+        countrySelectData.sunDown = new Date (result.data.sys.sunset * 1000)
         updateWeatherInfo(
             countrySelectData.weather.icon, 
             countrySelectData.weather.description,
             countrySelectData.weather.temp,
-            countrySelectData.weather.sys
+            countrySelectData.sunUp,
+            countrySelectData.sunDown
             )
     }, function(error){
         console.error(error.responseText)
@@ -341,14 +354,16 @@ function getCountrySelectWeather (latitude, longitude) {
     
 }
 
-function updateWeatherInfo (weatherIcon, weatherDescription, weatherTemp, weatherSys){
-    const date = new Date(weatherSys.sunrise * 1000)
+function updateWeatherInfo (weatherIcon, weatherDescription, weatherTemp, sunUp, sunDown){
+    // const sunUp = new Date(initialLocationData.sunrise * 1000)
+    // const sunDown = new Date(initialLocationData.sunset * 1000)
     const weatherUrl = `http://openweathermap.org/img/w/${weatherIcon}.png`
     const iconElement = `<img id="wicon" src="${weatherUrl}" alt="Weather Icon"></img>`
 
-    $("#weather").html(`Weather: ${weatherDescription}${iconElement}`)
+    $("#weather").html(`${weatherDescription}${iconElement}`)
     $("#temp").html(`Temperature: ${weatherTemp}&#8451`)
-    $('#sunrise').html(`Sunrise: ${date}`)
+    $('#sunrise').html(`Sunrise: ${sunUp}`)
+    $('#sunset').html(`Sunset: ${sunDown}`)
 }
 
 //Use iso code to fetch data from RestCountries API, uses currency code to get data from currency api:

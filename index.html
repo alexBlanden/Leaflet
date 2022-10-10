@@ -44,7 +44,7 @@
                     <a href="" class="btn btn-secondary" id="layers">Clear Markers</a>
                 </form>
             </nav>
-            <div class="modal" tabindex="-1" id="countryModal">
+            <div class="modal fade" tabindex="-1" id="countryModal">
                 <div class="modal-dialog">
                   <div class="modal-content">
                     <div class="modal-header">
@@ -52,13 +52,14 @@
                       <img src="" alt="" id="flag">
                       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body" id="countryBody">
                         <div id="factscontainer">
                             <ul>
                                 <li id="population"><h6>Population:</h6></li>
                                 <li id="capitalcity"><h6>Capital City:</h6></li>
                                 <li id="language"><h6>Language:</h6></li>
                                 <li id="region"><h6>Region</h6></li>
+                                <li id="drives"><h6>Drive on the</h6></li>
                             </ul>
                         </div>
                     </div>
@@ -68,22 +69,22 @@
                   </div>
                 </div>
               </div>
-            <div id="map" class="rounded"></div> 
-        </div>
-
-        <div class="modal" tabindex="-1" id="weatherModal">
+        <!-- </div> -->
+        <div class="modal fade" tabindex="-1" id="weatherModal">
             <div class="modal-dialog">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title" id="country"></h5>
-                  <img src="" alt="" id="flag">
+                  <h5 class="modal-title" id="weatherTitle">Weather</h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <ul>
-                        <li id="temp"></li>
-                        <li id="weather"><img id="wicon" src="" alt="Weather Icon"></li>
-                    </ul>
+                    <div id="weathercontainer">
+                        <ul>
+                            <li id="temp"></li>
+                            <li id="weather"><img id="wicon" src="" alt="Weather Icon"></li>
+                            <li id="sunrise"></li>
+                            <li id="sunset"></li>
+                        </ul>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -92,8 +93,11 @@
               </div>
             </div>
           </div>
-        <div id="map" class="rounded"></div> 
-    </div>
+
+            <div id="map" class="rounded"></div> 
+          <!-- </div>
+        <div id="map" class="rounded"></div>  -->
+    <!-- </div> -->
                 <!-- </main> -->
         <!-- offcanvas -->
         <div class="offcanvas offcanvas-start overflow-auto" tabindex="-1" id="countryinfo" aria-labelledby="sidebar-label">
