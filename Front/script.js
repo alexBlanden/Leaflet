@@ -103,9 +103,9 @@ function loadEasyButtons () {
 
     }).addTo(map)
 
-    L.easyButton('fa-news', function(btn, map){
+    L.easyButton("fa-newspaper", function(btn, map){
 
-    })
+    }).addTo(map)
 
 
 }

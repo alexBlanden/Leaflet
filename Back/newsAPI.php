@@ -12,7 +12,7 @@ $dotenv->load();
 
 $apiKey= 'b3f3ea23e99c413fa4e6f6da8f889f38';
 
-$url = "http://newsapi.org/v2/top-headlines?country=" . $_REQUEST['country'] . "&apiKey=" . $apiKey;
+$url = "http://newsapi.org/v2/top-headlines?country=" . $_REQUEST['iso'] . "&apiKey=" . $apiKey;
 
 
 //Curl Session:
@@ -20,6 +20,7 @@ $url = "http://newsapi.org/v2/top-headlines?country=" . $_REQUEST['country'] . "
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
 curl_setopt($ch, CURLOPT_URL, $url);
 
 $result = curl_exec($ch);
