@@ -3,8 +3,6 @@
 $countryBordersFileContent = file_get_contents("./countryBorders.geo.json");
 $decode = json_decode($countryBordersFileContent, true);
 
-// $test_route = $decode['features'][0]['geometry'];
-
 $iso_and_coordinates = [];
 
 $requested_country = strtoupper($_REQUEST['iso']);

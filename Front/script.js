@@ -103,6 +103,10 @@ function loadEasyButtons () {
 
     }).addTo(map)
 
+    L.easyButton('fa-news', function(btn, map){
+
+    })
+
 
 }
 //Use Navigator object method to determine user's latitude and longitude
@@ -146,6 +150,21 @@ function loadLocation () {
     
 }
 
+function getNews(iso){
+    console.log(`starting getNews function`)
+    var contactNewsAPI = fetchAjax(
+        'Back/newsAPI.php',
+        {
+            iso
+        }
+    );
+    $.when(contactNewsAPI).then(function (result){
+        console.log(result)
+    }, function (error) {
+        console.log(error.responseText)
+    })
+}
+
 function getDataFromCoordinates(lat,lng) {
     console.log('starting getData')
     var contactOpenCage = fetchAjax(
@@ -166,6 +185,7 @@ $.when(contactOpenCage).then(function(result){
 
     //Defined on line 318
     getFromRestCountries(initialLocationData.isoA2)
+    getNews(initialLocationData.isoA2);
     //Defined on line 125
     drawInitialCountryBorders(initialLocationData.isoA2)
 }, function(err){
@@ -355,8 +375,6 @@ function getCountrySelectWeather (latitude, longitude) {
 }
 
 function updateWeatherInfo (weatherIcon, weatherDescription, weatherTemp, sunUp, sunDown){
-    // const sunUp = new Date(initialLocationData.sunrise * 1000)
-    // const sunDown = new Date(initialLocationData.sunset * 1000)
     const weatherUrl = `http://openweathermap.org/img/w/${weatherIcon}.png`
     const iconElement = `<img id="wicon" src="${weatherUrl}" alt="Weather Icon"></img>`
 
@@ -473,6 +491,7 @@ $(document).ready(function(){
                     //Populate Weather Info
                     getCountrySelectWeather(countrySelectData.lat, countrySelectData.lng)
                     getFromRestCountries(currentCountryIso)
+                    getNews(currentCountryIso);
                     initialBoundingBox = JSON.parse(JSON.stringify(mapBorder.getBounds()))
         
                     getPlacesOfInterest(initialBoundingBox)
