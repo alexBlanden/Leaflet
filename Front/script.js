@@ -18,6 +18,8 @@ var mapStyle = {
 }
 var countryModal = new bootstrap.Modal($('#countryModal'));
 var weatherModal = new bootstrap.Modal($('#weatherModal'));
+var newsModal = new bootstrap.Modal($('#newsModal'));
+
 
 var currencyName;
 var currencySymbol;
@@ -67,7 +69,7 @@ var mapBorder = null;
 let markers = null;
 
 
-//If getCurrentPosition is successful, load as appropriate. If not, display error for user 
+//If getCurrentPosition is successful, load as appropriate. If not, default to Brussels 
 const success = (position) => {
     //assign initial location data coordinates
     initialLocationData.lat =  position.coords.latitude;
@@ -104,7 +106,7 @@ function loadEasyButtons () {
     }).addTo(map)
 
     L.easyButton("fa-newspaper", function(btn, map){
-
+        newsModal.toggle()
     }).addTo(map)
 
 
@@ -159,7 +161,20 @@ function getNews(iso){
         }
     );
     $.when(contactNewsAPI).then(function (result){
-        console.log(result)
+        //Clear previous entries
+        $('#newsBody').html("")
+        console.log(result.data.articles)
+        if(!result.data.articles.length){
+            $('#newsBody').html("<tr><td></td><td>Sorry, news service unavailable</td><td></td></tr>")
+        }
+        for(let i= 0; i<result.data.articles.length; i++){
+        $('#newsBody').append(
+            `<tr>
+            <th scope="row">${i+1}</th>
+            <td>${result.data.articles[i].title}</td>
+            <td><a href="${result.data.articles[i].url}" target="_BLANK">${result.data.articles[i].source.Name}</a></td>
+          </tr>`
+        )}
     }, function (error) {
         console.log(error.responseText)
     })
@@ -477,6 +492,7 @@ $(document).ready(function(){
                 countrySelect = countryVal.name;
 
                 drawCountryBorders(currentCountryIso)
+                getNews(currentCountryIso);
                 
                 //Perform forward Geocoding using country name
                 var contactOpenCageForward = fetchAjax(
