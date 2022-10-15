@@ -2,7 +2,7 @@
     padding: 2%;
 }
 html, body, .container, #map {
-    height: 95%;
+    height: 99%;
     width: 95vw;
 }
 
@@ -25,7 +25,6 @@ a {
     color: aliceblue;
 }
 
-#country_menu {
-    max-height: 100vh;
-    overflow-y: scroll;
+#selectContainer{
+    width: 200px;
 }
