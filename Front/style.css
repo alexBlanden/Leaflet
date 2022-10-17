@@ -25,6 +25,20 @@ a {
     color: aliceblue;
 }
 
+.cards-wrapper{
+    display: flex;
+    justify-content: center;
+}
+
+.card {
+    margin: 2px;
+}
+
 #selectContainer{
     width: 200px;
+}
+
+#weatherModal .modal-body {
+    background-image: url('./assets/pexels-francesco-ungaro-281260.jpg');
+    background-size: 115%;
 }

@@ -1,3 +1,6 @@
+/* eslint-env jquery */
+/* eslint-env bootstrap */
+
 var fetchAjax = function (address, query) {
     return $.ajax({
         url: address,
@@ -26,8 +29,8 @@ var currencySymbol;
 var currencyCode;
 var languages;
 var boundingBox = {};
-var layerControl;
-var featureGroup;
+// var layerControl;
+// var featureGroup;
 
 var initialLocationData = {
     lat:"",
@@ -60,10 +63,12 @@ var countrySelectData = {
     sunDown: null,
     currencyCode: ""
 }
-var countrySelect
-var countrySelectLat
-var countrySelectLng
-var countrySelectIso
+
+var fiveDayForecast = [];
+// var countrySelect
+// var countrySelectLat
+// var countrySelectLng
+// var countrySelectIso
 
 var mapBorder = null;
 let markers = null;
@@ -81,7 +86,7 @@ const success = (position) => {
     getInitialWeather(initialLocationData.lat,initialLocationData.lng);
     getDataFromCoordinates(initialLocationData.lat,initialLocationData.lng);
 }
-const fail = (error) => {
+const fail = () => {
     loadMap();
     // getDataFromCoordinates(50.8476, 4.3572);
     getCountrySelectWeather(50.8476, 4.3572);
@@ -90,8 +95,6 @@ const fail = (error) => {
 }
 
 function loadEasyButtons () {
-    var helloPopup = L.popup().setContent('Hello World!');
-
     L.easyButton('fa-globe', function(btn, map) {
         countryModal.toggle();
     }).addTo(map)
@@ -164,9 +167,11 @@ function getNews(iso){
         //Clear previous entries
         $('#newsBody').html("")
         console.log(result.data.articles)
+        //Service not available in all countries
         if(!result.data.articles.length){
             $('#newsBody').html("<tr><td></td><td>Sorry, news service unavailable</td><td></td></tr>")
         }
+        //Iterate over articles array and append info to relevant section of newsModal
         for(let i= 0; i<result.data.articles.length; i++){
         $('#newsBody').append(
             `<tr>
@@ -342,23 +347,60 @@ function getInitialWeather(latitude, longitude) {
     $.when(contactOpenWeather).then(function(result){
         //Populate weather info.
         console.log(result)
-        initialLocationData.weather.description = result.data.weather[0].description;
-        initialLocationData.weather.icon = result.data.weather[0].icon
-        initialLocationData.weather.temp = Math.floor(result.data.main.temp)
-        initialLocationData.sunUp = new Date(result.data.sys.sunrise * 1000)
-        initialLocationData.sunDown = new Date (result.data.sys.sunset * 1000)
-        updateWeatherInfo(
-            initialLocationData.weather.icon, 
-            initialLocationData.weather.description,
-            initialLocationData.weather.temp,
-            initialLocationData.sunUp,
-            initialLocationData.sunDown
+        for(let i = 0; i<result.data.list.length; i+=2){
+            $('#carouselInfo').append(
+                `<div class="carousel-item" id="carousel${i}">
+                <div class="cards-wrapper">
+
+                  <div class="card text-bg-light mb-3" style="width: 10rem;">
+                    <div class="card-body">
+                      <h5 class="card-title">${result.data.list[i].dt_txt}</h5>
+                      <img src="http://openweathermap.org/img/w/${result.data.list[i].weather[0].icon}.png" alt="${result.data.list[i].weather[0].description}">
+                      <ul class="card-text">
+                      <li>${Math.floor(result.data.list[i].main.temp)}&#8451</li>
+                      <li>${result.data.list[i].weather[0].main}</li>
+                      </ul>
+                    </div>
+                  </div>
+                
+                
+                  <div class="card text-bg-light mb-3" style="width: 10rem;">
+                    <div class="card-body">
+                      <h5 class="card-title">${result.data.list[i+1].dt_txt}</h5>
+                      <img src="http://openweathermap.org/img/w/${result.data.list[i+1].weather[0].icon}.png" alt="${result.data.list[i+1].weather[0].description}">
+                      <ul class="card-text">
+                      <li>${Math.floor(result.data.list[i+1].main.temp)}&#8451</li>
+                      <li>${result.data.list[i+1].weather[0].main}</li>
+                      
+                      </ul>
+                    </div>
+                  </div>
+                
+              </div>`
             )
+           
+        }
+
+        $('#carousel0').addClass('active')
+        // initialLocationData.weather.description = result.data.weather[0].description;
+        // initialLocationData.weather.icon = result.data.weather[0].icon
+        // initialLocationData.weather.temp = Math.floor(result.data.main.temp)
+        // initialLocationData.sunUp = new Date(result.data.sys.sunrise * 1000)
+        // initialLocationData.sunDown = new Date (result.data.sys.sunset * 1000)
+        // updateWeatherInfo(
+        //     initialLocationData.weather.icon, 
+        //     initialLocationData.weather.description,
+        //     initialLocationData.weather.temp,
+        //     initialLocationData.sunUp,
+        //     initialLocationData.sunDown
+        //     )
     }, function(error){
         console.error(error.responseText)
     })
     
 }
+
+
 
 function getCountrySelectWeather (latitude, longitude) {
     var contactOpenWeather = fetchAjax (
@@ -397,6 +439,8 @@ function updateWeatherInfo (weatherIcon, weatherDescription, weatherTemp, sunUp,
     $("#temp").html(`Temperature: ${weatherTemp}&#8451`)
     $('#sunrise').html(`Sunrise: ${sunUp}`)
     $('#sunset').html(`Sunset: ${sunDown}`)
+
+    $('#temp').html()
 }
 
 //Use iso code to fetch data from RestCountries API, uses currency code to get data from currency api:

@@ -9,12 +9,10 @@ require __DIR__ . '/vendor/autoload.php';
 $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-// $map_tiler_API = $_ENV['map_tiler_API'];
-
 $openWeather = $_ENV['open_weather_id'];
 
-// //Url with api key visible for testing purposes:
-$url = 'https://api.openweathermap.org/data/2.5/weather?lat='. $_REQUEST['latitude'].'&lon='.$_REQUEST['longitude'].'&units=metric&appid='.$openWeather;    
+
+$url = 'https://api.openweathermap.org/data/2.5/forecast?lat='. $_REQUEST['latitude'].'&lon='.$_REQUEST['longitude'].'&cnt=10&units=metric&appid='.$openWeather;    
 
         // ______________________
 
@@ -41,8 +39,6 @@ $output['data'] = $decode;
 
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json; charset=UTF-8');
-
-// print_r($_REQUEST);
 
 echo json_encode($output);
 
