@@ -347,14 +347,38 @@ function getInitialWeather(latitude, longitude) {
     $.when(contactOpenWeather).then(function(result){
         //Populate weather info.
         console.log(result)
+        let dt = result.data.list[0].dt_txt.split("");
+        console.log(dt)
+        dt.length = 10;
+        dt = dt.join("")
+        const quickConvert = (dt_txt) => {
+            dt_txt.split("")
+            dt_txt.length = 10;
+            return dt_txt
+        }
+        for(let x = 0; x<5; x++){
+            let counter = 0;
+            if(quickConvert(result.data.list[x].dt_txt) == dt){
+                counter++
+            }
+            console.log(counter)
+        }
+        const daysOfTheWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        console.log(`date is ${dt}`)
+    
         for(let i = 0; i<result.data.list.length; i+=2){
+            // $('#indicators').append(`<button type="button" id="indicator${i}" data-bs-target="#weatherCarousel" data-bs-slide-to="${i}"  aria-label="Slide ${i}"></button>`)
+            let date = new Date(result.data.list[i].dt * 1000);
+            let date2 = new Date(result.data.list[i+1].dt * 1000);
+
             $('#carouselInfo').append(
                 `<div class="carousel-item" id="carousel${i}">
                 <div class="cards-wrapper">
 
                   <div class="card text-bg-light mb-3" style="width: 10rem;">
                     <div class="card-body">
-                      <h5 class="card-title">${result.data.list[i].dt_txt}</h5>
+                      <h5 class="card-title">${date.toLocaleDateString("en-GB")}</h5>
+                      <h6>${date.toLocaleTimeString("en-GB")}</h6>
                       <img src="http://openweathermap.org/img/w/${result.data.list[i].weather[0].icon}.png" alt="${result.data.list[i].weather[0].description}">
                       <ul class="card-text">
                       <li>${Math.floor(result.data.list[i].main.temp)}&#8451</li>
@@ -366,7 +390,8 @@ function getInitialWeather(latitude, longitude) {
                 
                   <div class="card text-bg-light mb-3" style="width: 10rem;">
                     <div class="card-body">
-                      <h5 class="card-title">${result.data.list[i+1].dt_txt}</h5>
+                      <h5 class="card-title">${date2.toLocaleDateString("en-GB")}</h5>
+                      <h6>${date2.toLocaleTimeString("en-GB")}</h6>
                       <img src="http://openweathermap.org/img/w/${result.data.list[i+1].weather[0].icon}.png" alt="${result.data.list[i+1].weather[0].description}">
                       <ul class="card-text">
                       <li>${Math.floor(result.data.list[i+1].main.temp)}&#8451</li>
@@ -380,6 +405,8 @@ function getInitialWeather(latitude, longitude) {
             )
            
         }
+        // $('#indicator0').addClass("active")
+        // $('#indicator0').attr("aria-current=true")
 
         $('#carousel0').addClass('active')
         // initialLocationData.weather.description = result.data.weather[0].description;
