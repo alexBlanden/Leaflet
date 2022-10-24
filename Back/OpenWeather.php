@@ -12,7 +12,7 @@ $dotenv->load();
 $openWeather = $_ENV['open_weather_id'];
 
 
-$url = 'https://api.openweathermap.org/data/2.5/forecast?lat='. $_REQUEST['latitude'].'&lon='.$_REQUEST['longitude'].'&cnt=10&units=metric&appid='.$openWeather;    
+$url = 'https://api.openweathermap.org/data/2.5/forecast?lat='. $_REQUEST['latitude'].'&lon='.$_REQUEST['longitude'].'&units=metric&appid='.$openWeather;    
 
         // ______________________
 

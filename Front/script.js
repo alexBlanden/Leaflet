@@ -1,5 +1,6 @@
 /* eslint-env jquery */
-/* eslint-env bootstrap */
+
+// const { Chart } = require("chart.js");
 
 var fetchAjax = function (address, query) {
     return $.ajax({
@@ -83,13 +84,13 @@ const success = (position) => {
     loadLocation()
     loadEasyButtons();
 
-    getInitialWeather(initialLocationData.lat,initialLocationData.lng);
+    getWeather(initialLocationData.lat,initialLocationData.lng);
     getDataFromCoordinates(initialLocationData.lat,initialLocationData.lng);
 }
 const fail = () => {
     loadMap();
     // getDataFromCoordinates(50.8476, 4.3572);
-    getCountrySelectWeather(50.8476, 4.3572);
+    getWeather(50.8476, 4.3572);
     drawInitialCountryBorders('BE');
     loadEasyButtons();
 }
@@ -156,7 +157,6 @@ function loadLocation () {
 }
 
 function getNews(iso){
-    console.log(`starting getNews function`)
     var contactNewsAPI = fetchAjax(
         'Back/newsAPI.php',
         {
@@ -166,7 +166,6 @@ function getNews(iso){
     $.when(contactNewsAPI).then(function (result){
         //Clear previous entries
         $('#newsBody').html("")
-        console.log(result.data.articles)
         //Service not available in all countries
         if(!result.data.articles.length){
             $('#newsBody').html("<tr><td></td><td>Sorry, news service unavailable</td><td></td></tr>")
@@ -186,7 +185,6 @@ function getNews(iso){
 }
 
 function getDataFromCoordinates(lat,lng) {
-    console.log('starting getData')
     var contactOpenCage = fetchAjax(
     'Back/OpenCage.php',
     {
@@ -196,7 +194,6 @@ function getDataFromCoordinates(lat,lng) {
 );
 $.when(contactOpenCage).then(function(result){
     //saves iso and country name from returned data
-    console.log(result)
     initialLocationData.isoA2 = result.data.results[0].components.country_code;
     initialLocationData.countryName = result.data.results[0].components.state;
 
@@ -225,7 +222,7 @@ function drawInitialCountryBorders (iso) {
         mapBorder = L.geoJson(result.data[0].coordinates, {style: 
             mapStyle
         }).addTo(map)
-        initialBoundingBox = JSON.parse(JSON.stringify(mapBorder.getBounds()))
+        let initialBoundingBox = JSON.parse(JSON.stringify(mapBorder.getBounds()))
         getPlacesOfInterest(initialBoundingBox) 
     }, function(err){
         console.log(err.responseText);
@@ -263,8 +260,7 @@ function getPlacesOfInterest (bbox) {
         }
     );
     $.when(placesOfInterest).then(function(result){
-        console.log(result.data)
-        if(result.data == undefined){
+        if(!result.data){
             alert("Sorry Places of interest API unavailable")
         }
         //result needs to be geoJson
@@ -329,14 +325,14 @@ function getPlacesOfInterest (bbox) {
 
     
     }, function(err){
-        console.log(err.responseText)
+        alert('Sorry, API did not respond, please try again.')
     })
 }
 
 //Uses latitude and longitude to add data to initialLocation object
 
-//Uses coordinates to get weather info for user lat/lng
-function getInitialWeather(latitude, longitude) {
+//Uses coordinates to get weather info for lat/lng
+function getWeather(latitude, longitude) {
     var contactOpenWeather = fetchAjax (
         'Back/OpenWeather.php',
         {
@@ -345,31 +341,21 @@ function getInitialWeather(latitude, longitude) {
         }
     );
     $.when(contactOpenWeather).then(function(result){
-        //Populate weather info.
+        $('#carouselInfo').empty();
         console.log(result)
-        let dt = result.data.list[0].dt_txt.split("");
-        console.log(dt)
-        dt.length = 10;
-        dt = dt.join("")
-        const quickConvert = (dt_txt) => {
-            dt_txt.split("")
-            dt_txt.length = 10;
-            return dt_txt
-        }
-        for(let x = 0; x<5; x++){
-            let counter = 0;
-            if(quickConvert(result.data.list[x].dt_txt) == dt){
-                counter++
-            }
-            console.log(counter)
-        }
-        const daysOfTheWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-        console.log(`date is ${dt}`)
+
+        const timeOfDay = [];
+        const temperature = [];
+
+        const bgroundColor = [];
+
     
         for(let i = 0; i<result.data.list.length; i+=2){
-            // $('#indicators').append(`<button type="button" id="indicator${i}" data-bs-target="#weatherCarousel" data-bs-slide-to="${i}"  aria-label="Slide ${i}"></button>`)
             let date = new Date(result.data.list[i].dt * 1000);
             let date2 = new Date(result.data.list[i+1].dt * 1000);
+            timeOfDay.push(date.toLocaleTimeString("en-GB"), date2.toLocaleTimeString("en-GB"));
+            temperature.push(result.data.list[i].main.temp, result.data.list[i+1].main.temp)
+            
 
             $('#carouselInfo').append(
                 `<div class="carousel-item" id="carousel${i}">
@@ -405,22 +391,54 @@ function getInitialWeather(latitude, longitude) {
             )
            
         }
+        //Create color scheme for temperature chart
+        for(let i=0; i<temperature.length; i++){
+            if(temperature[i]> 25){
+                bgroundColor.push('rgba(255, 0, 0, 0.8)')
+            }else if(temperature[i]> 20){
+                bgroundColor.push('rgba(255, 0, 0, 0.4)')
+            } else if (temperature[i]>15){
+                bgroundColor.push('rgba(255, 252, 0, 0.6)')
+            } else if (temperature[i]>10){
+                bgroundColor.push('rgba(185, 227, 54, 0.61)')
+            } else if (temperature[i]>5){
+                bgroundColor.push('rgba(0, 0, 255, 1)')     
+            } else {
+                bgroundColor.push('rgba(0, 0, 255, 0.2)')    
+            }
+        }
+        const ctx = $('#weatherChart');
+        const weatherChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: timeOfDay,
+                datasets: [{
+                    label: 'Temp in Celcius',
+                    data: temperature,
+                    backgroundColor: bgroundColor,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                animations: {
+                    tension: {
+                        duration: 1000,
+                        easing: 'linear',
+                        from: 1,
+                        to: 0,
+                        loop: true
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false
+                    }
+                }
+            }
+        })
         // $('#indicator0').addClass("active")
         // $('#indicator0').attr("aria-current=true")
-
         $('#carousel0').addClass('active')
-        // initialLocationData.weather.description = result.data.weather[0].description;
-        // initialLocationData.weather.icon = result.data.weather[0].icon
-        // initialLocationData.weather.temp = Math.floor(result.data.main.temp)
-        // initialLocationData.sunUp = new Date(result.data.sys.sunrise * 1000)
-        // initialLocationData.sunDown = new Date (result.data.sys.sunset * 1000)
-        // updateWeatherInfo(
-        //     initialLocationData.weather.icon, 
-        //     initialLocationData.weather.description,
-        //     initialLocationData.weather.temp,
-        //     initialLocationData.sunUp,
-        //     initialLocationData.sunDown
-        //     )
     }, function(error){
         console.error(error.responseText)
     })
@@ -429,46 +447,34 @@ function getInitialWeather(latitude, longitude) {
 
 
 
-function getCountrySelectWeather (latitude, longitude) {
-    var contactOpenWeather = fetchAjax (
-        'Back/OpenWeather.php',
-        {
-            latitude,
-            longitude
-        }
-    );
-    $.when(contactOpenWeather).then(function(result){
-        console.log(result)
-        //Populate weather info.
-        countrySelectData.weather.description = result.data.weather[0].description;
-        countrySelectData.weather.icon = result.data.weather[0].icon
-        countrySelectData.weather.temp = Math.floor(result.data.main.temp)
-        countrySelectData.sunUp = new Date(result.data.sys.sunrise * 1000)
-        countrySelectData.sunDown = new Date (result.data.sys.sunset * 1000)
-        updateWeatherInfo(
-            countrySelectData.weather.icon, 
-            countrySelectData.weather.description,
-            countrySelectData.weather.temp,
-            countrySelectData.sunUp,
-            countrySelectData.sunDown
-            )
-    }, function(error){
-        console.error(error.responseText)
-    })
+// function getCountrySelectWeather (latitude, longitude) {
+//     var contactOpenWeather = fetchAjax (
+//         'Back/OpenWeather.php',
+//         {
+//             latitude,
+//             longitude
+//         }
+//     );
+//     $.when(contactOpenWeather).then(function(result){
+//         console.log(result)
+//         //Populate weather info.
+//         countrySelectData.weather.description = result.data.weather[0].description;
+//         countrySelectData.weather.icon = result.data.weather[0].icon
+//         countrySelectData.weather.temp = Math.floor(result.data.main.temp)
+//         countrySelectData.sunUp = new Date(result.data.sys.sunrise * 1000)
+//         countrySelectData.sunDown = new Date (result.data.sys.sunset * 1000)
+//         updateWeatherInfo(
+//             countrySelectData.weather.icon, 
+//             countrySelectData.weather.description,
+//             countrySelectData.weather.temp,
+//             countrySelectData.sunUp,
+//             countrySelectData.sunDown
+//             )
+//     }, function(error){
+//         console.error(error.responseText)
+//     })
     
-}
-
-function updateWeatherInfo (weatherIcon, weatherDescription, weatherTemp, sunUp, sunDown){
-    const weatherUrl = `http://openweathermap.org/img/w/${weatherIcon}.png`
-    const iconElement = `<img id="wicon" src="${weatherUrl}" alt="Weather Icon"></img>`
-
-    $("#weather").html(`${weatherDescription}${iconElement}`)
-    $("#temp").html(`Temperature: ${weatherTemp}&#8451`)
-    $('#sunrise').html(`Sunrise: ${sunUp}`)
-    $('#sunset').html(`Sunset: ${sunDown}`)
-
-    $('#temp').html()
-}
+// }
 
 //Use iso code to fetch data from RestCountries API, uses currency code to get data from currency api:
 function getFromRestCountries(iso) {
@@ -479,7 +485,6 @@ function getFromRestCountries(iso) {
         }
     );
     $.when(contactRestCountries).then(function(result){
-        console.log(result)
         $("#flag").attr({
             src:`https://flagcdn.com/w320/${iso.toLowerCase()}.png`,
             height: '45px'
@@ -547,12 +552,8 @@ $(document).ready(function(){
         $.when(getGeoJson).then(function (result){
             for(let i= 0; i < result.data.length; i++){
                 $('#country_menu').append(
-                    `<option class="country_menu_select" value='{"iso":"${result.data[i].iso_a2}", "name":"${result.data[i].name}"}'>${result.data[i].name}</option>`)
-                // $('#datalistOptions').append(
-                //     `<option value= ${result.data[i].name}>`
-                // )     
+                    `<option class="country_menu_select" value='{"iso":"${result.data[i].iso_a2}", "name":"${result.data[i].name}"}'>${result.data[i].name}</option>`)   
             }
-
             $("#country_menu").change(function(){
                 //Value made up of iso code and name of country
                 var countryVal = JSON.parse($('#country_menu').val())
@@ -560,7 +561,7 @@ $(document).ready(function(){
                 const currentCountryIso = countrySelectData.countryIso;
                 const currentCountryName = encodeURI(countryVal.name);
                 countrySelectData.countryName = countryVal.name;
-                countrySelect = countryVal.name;
+                // const countrySelect = countryVal.name;
 
                 drawCountryBorders(currentCountryIso)
                 getNews(currentCountryIso);
@@ -575,11 +576,12 @@ $(document).ready(function(){
                     //Set Latitude and Longitude
                     countrySelectData.lat = result.data.results[0].geometry.lat;
                     countrySelectData.lng = result.data.results[0].geometry.lng;
+                    console.log(`HERE: ${countrySelectData.lat}, ${countrySelectData.lng}`)
                     //Populate Weather Info
-                    getCountrySelectWeather(countrySelectData.lat, countrySelectData.lng)
+                    getWeather(countrySelectData.lat, countrySelectData.lng)
                     getFromRestCountries(currentCountryIso)
                     getNews(currentCountryIso);
-                    initialBoundingBox = JSON.parse(JSON.stringify(mapBorder.getBounds()))
+                    let initialBoundingBox = JSON.parse(JSON.stringify(mapBorder.getBounds()))
         
                     getPlacesOfInterest(initialBoundingBox)
                     
@@ -594,9 +596,9 @@ $(document).ready(function(){
 
 });
 
-$("#layers").click(function (){
-    markers.removelayer(featureData)
-})
+// $("#layers").click(function (){
+//     markers.removelayer(featureData)
+// })
 
 
 // CSS blur effect:

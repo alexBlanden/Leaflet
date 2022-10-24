@@ -62,7 +62,7 @@
                 </div>
               </div>
         <!-- </div> -->
-        <div class="modal fade" tabindex="-1" id="weatherModal">
+        <div class="modal fade modal-lg" tabindex="-1" id="weatherModal">
             <div class="modal-dialog">
               <div class="modal-content">
                 <div class="modal-header">
@@ -85,7 +85,9 @@
                         <span class="visually-hidden">Next</span>
                       </button>
                     </div>
-
+                    <div>
+                      <canvas id="weatherChart"></canvas>
+                    </div>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -138,15 +140,10 @@
                 <li id="vsthedollar"></li>
             </div>
         </div>
-        <div class="offcanvas offcanvas-end overflow-auto" tabindex="-1" id="navigation" aria-labelledby="sidebar-label">
-            <div class="offcanvas-header">
-                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
-                <h4 class="offcanvas-title">Pick A Country:</h4>
-            </div>
-        </div>
         <script src="Front/node_modules/leaflet-easybutton/src/easy-button.js"></script>
         <script src="https://kit.fontawesome.com/8b56d6a893.js" crossorigin="anonymous"></script>
         <script src="Front/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="Front/node_modules/chart.js/dist/chart.min.js"></script>
     </body>
     <script src="Front/script.js"></script>
 </html>
