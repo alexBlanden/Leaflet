@@ -342,6 +342,7 @@ function getWeather(latitude, longitude) {
     );
     $.when(contactOpenWeather).then(function(result){
         $('#carouselInfo').empty();
+        $('#carouselInfo').addClass("carousel-inner");
         console.log(result)
 
         const timeOfDay = [];
@@ -382,11 +383,11 @@ function getWeather(latitude, longitude) {
                       <ul class="card-text">
                       <li>${Math.floor(result.data.list[i+1].main.temp)}&#8451</li>
                       <li>${result.data.list[i+1].weather[0].main}</li>
-                      
                       </ul>
                     </div>
                   </div>
                 
+              </div>
               </div>`
             )
            
