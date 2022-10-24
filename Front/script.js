@@ -341,8 +341,7 @@ function getWeather(latitude, longitude) {
         }
     );
     $.when(contactOpenWeather).then(function(result){
-        $('#carouselInfo').empty();
-        $('#carouselInfo').addClass("carousel-inner");
+        $('#carouselInfo').text("l")
         console.log(result)
 
         const timeOfDay = [];
@@ -357,38 +356,38 @@ function getWeather(latitude, longitude) {
             timeOfDay.push(date.toLocaleTimeString("en-GB"), date2.toLocaleTimeString("en-GB"));
             temperature.push(result.data.list[i].main.temp, result.data.list[i+1].main.temp)
             
-
+            //Add bootstrap info cards to carousel.
             $('#carouselInfo').append(
                 `<div class="carousel-item" id="carousel${i}">
-                <div class="cards-wrapper">
+                    <div class="cards-wrapper">
 
-                  <div class="card text-bg-light mb-3" style="width: 10rem;">
-                    <div class="card-body">
-                      <h5 class="card-title">${date.toLocaleDateString("en-GB")}</h5>
-                      <h6>${date.toLocaleTimeString("en-GB")}</h6>
-                      <img src="http://openweathermap.org/img/w/${result.data.list[i].weather[0].icon}.png" alt="${result.data.list[i].weather[0].description}">
-                      <ul class="card-text">
-                      <li>${Math.floor(result.data.list[i].main.temp)}&#8451</li>
-                      <li>${result.data.list[i].weather[0].main}</li>
-                      </ul>
+                        <div class="card text-bg-light mb-3" style="width: 10rem;">
+                            <div class="card-body">
+                                <h5 class="card-title">${date.toLocaleDateString("en-GB")}</h5>
+                                <h6>${date.toLocaleTimeString("en-GB")}</h6>
+                                <img src="http://openweathermap.org/img/w/${result.data.list[i].weather[0].icon}.png" alt="${result.data.list[i].weather[0].description}">
+                                <ul class="card-text">
+                                    <li>${Math.floor(result.data.list[i].main.temp)}&#8451</li>
+                                    <li>${result.data.list[i].weather[0].main}</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        
+                        <div class="card text-bg-light mb-3" style="width: 10rem;">
+                            <div class="card-body">
+                                <h5 class="card-title">${date2.toLocaleDateString("en-GB")}</h5>
+                                <h6>${date2.toLocaleTimeString("en-GB")}</h6>
+                                <img src="http://openweathermap.org/img/w/${result.data.list[i+1].weather[0].icon}.png" alt="${result.data.list[i+1].weather[0].description}">
+                                <ul class="card-text">
+                                    <li>${Math.floor(result.data.list[i+1].main.temp)}&#8451</li>
+                                    <li>${result.data.list[i+1].weather[0].main}</li>
+                                </ul>
+                            </div>
+                        </div>
+                
                     </div>
-                  </div>
-                
-                
-                  <div class="card text-bg-light mb-3" style="width: 10rem;">
-                    <div class="card-body">
-                      <h5 class="card-title">${date2.toLocaleDateString("en-GB")}</h5>
-                      <h6>${date2.toLocaleTimeString("en-GB")}</h6>
-                      <img src="http://openweathermap.org/img/w/${result.data.list[i+1].weather[0].icon}.png" alt="${result.data.list[i+1].weather[0].description}">
-                      <ul class="card-text">
-                      <li>${Math.floor(result.data.list[i+1].main.temp)}&#8451</li>
-                      <li>${result.data.list[i+1].weather[0].main}</li>
-                      </ul>
-                    </div>
-                  </div>
-                
-              </div>
-              </div>`
+                </div>`
             )
            
         }
