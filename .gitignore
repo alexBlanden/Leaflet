@@ -1,5 +1,3 @@
 .env
 vendor
-Front/node_modules
-leaflet
-leaflet.markercluster
+node_modules
