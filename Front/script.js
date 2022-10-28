@@ -23,6 +23,7 @@ var mapStyle = {
 var countryModal = new bootstrap.Modal($('#countryModal'));
 var weatherModal = new bootstrap.Modal($('#weatherModal'));
 var newsModal = new bootstrap.Modal($('#newsModal'));
+var currencyModal = new bootstrap.Modal($('#currencyModal'));
 
 
 var currencyName;
@@ -65,14 +66,47 @@ var countrySelectData = {
     currencyCode: ""
 }
 
-var fiveDayForecast = [];
+//Chart Data
+const timeOfDay = [];
+const temperature = [];
+const bgroundColor = [];
+
+const ctx = $('#weatherChart');
+const weatherChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: timeOfDay,
+        datasets: [{
+            label: 'Temp in Celcius',
+            data: temperature,
+            backgroundColor: bgroundColor,
+            borderWidth: 1
+        }]
+    },
+    options: {
+        animations: {
+            tension: {
+                duration: 1000,
+                easing: 'linear',
+                from: 1,
+                to: 0,
+                loop: true
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: false
+            }
+        }
+    }
+})
 // var countrySelect
 // var countrySelectLat
 // var countrySelectLng
 // var countrySelectIso
 
 var mapBorder = null;
-let markers = null;
+let markers = L.markerClusterGroup()
 
 
 //If getCurrentPosition is successful, load as appropriate. If not, default to Brussels 
@@ -101,16 +135,15 @@ function loadEasyButtons () {
     }).addTo(map)
 
     L.easyButton('fa-sun', function (btn, map){
-        weatherModal.toggle()
-
+        weatherModal.toggle();
     }).addTo(map)
 
     L.easyButton('fa-dollar', function (btn, map){
-
+        currencyModal.toggle();
     }).addTo(map)
 
     L.easyButton("fa-newspaper", function(btn, map){
-        newsModal.toggle()
+        newsModal.toggle();
     }).addTo(map)
 
 
@@ -130,7 +163,7 @@ function loadMap () {
     style: 'https://api.maptiler.com/maps/basic-v2/style.json?key=gce3UfFmnaOupUCQzm4b'
     }).addTo(map);
     L.marker([lat, lng]).addTo(map)
-        .bindPopup(`Location unknown! Use the buttons on the right to find out more`).openPopup();
+        .bindPopup(`Location unknown! Use the buttons on the left to find out more`).openPopup();
         L.circle([lat, lng], {radius: 500}).addTo(map);
     
 }
@@ -149,11 +182,8 @@ function loadLocation () {
     style: 'https://api.maptiler.com/maps/basic-v2/style.json?key=gce3UfFmnaOupUCQzm4b'
     }).addTo(map);
     L.marker([lat, lng]).addTo(map)
-        .bindPopup(`Found you! Use the buttons on the right to find out more`).openPopup();
+        .bindPopup(`Found you! Use the buttons on the left to find out more`).openPopup();
         L.circle([lat, lng], {radius: 500}).addTo(map);
-
-        //Returns country iso and name, uses iso to draw intial country border and get population fact
-    
 }
 
 function getNews(iso){
@@ -207,8 +237,8 @@ $.when(contactOpenCage).then(function(result){
     drawInitialCountryBorders(initialLocationData.isoA2)
 }, function(err){
     console.error(`Error:${err.responseText}`)
-})
-};
+});
+}
 
 function drawInitialCountryBorders (iso) {
     var countryBorders = fetchAjax(
@@ -244,6 +274,7 @@ function drawCountryBorders (iso) {
         }).addTo(map)
         //Center map view on newly selected country
         boundingBox = mapBorder.getBounds();
+        // map.flyToBounds(boundingBox)
         map.flyToBounds(boundingBox)
         
     }, function(err){
@@ -270,6 +301,11 @@ function getPlacesOfInterest (bbox) {
 
             ]
         }
+
+        if(resultAsJson.features.length > 0){
+            resultAsJson.features.length = 0;
+            }
+        
         //For loop pushes geojson objects to resultAsJson array
         for(let i= 0; i < result.data.geonames.length; i++){
             resultAsJson.features.push(
@@ -288,8 +324,9 @@ function getPlacesOfInterest (bbox) {
                 },
             )
         }
-       //Create markers layer  
-       markers = L.markerClusterGroup();
+       //Create markers layer    
+    //    markers = L.markerClusterGroup();
+       markers.clearLayers();
             
         const geojsonMarkerOptions = {
             radius: 8,
@@ -300,7 +337,7 @@ function getPlacesOfInterest (bbox) {
             fillOpacity: 0.8
         };
         //Take each feature in resultAsJson, add html and bind popup
-        const featureData = L.geoJSON(resultAsJson, {
+        let featureData = L.geoJSON(resultAsJson, {
                 onEachFeature: function (feature, layer) {
                     const content =
                     `
@@ -313,17 +350,11 @@ function getPlacesOfInterest (bbox) {
                     return L.circleMarker(latlng, geojsonMarkerOptions);
                 },
             });
-        if(markers){
-            markers.clearLayers()
-            }
             
-        while(resultAsJson.features.length > 0){
-            resultAsJson.features.pop();
-            }
         markers.addLayer(featureData);
+
         map.addLayer(markers);
 
-    
     }, function(err){
         alert('Sorry, API did not respond, please try again.')
     })
@@ -341,14 +372,12 @@ function getWeather(latitude, longitude) {
         }
     );
     $.when(contactOpenWeather).then(function(result){
-        $('#carouselInfo').text("l")
+        $('#carouselInfo').text("")
         console.log(result)
-
-        const timeOfDay = [];
-        const temperature = [];
-
-        const bgroundColor = [];
-
+        //Clear arrays used for weatherChart:
+        timeOfDay.length = 0;
+        temperature.length = 0;
+        bgroundColor.length = 0;
     
         for(let i = 0; i<result.data.list.length; i+=2){
             let date = new Date(result.data.list[i].dt * 1000);
@@ -357,8 +386,42 @@ function getWeather(latitude, longitude) {
             temperature.push(result.data.list[i].main.temp, result.data.list[i+1].main.temp)
             
             //Add bootstrap info cards to carousel.
+            if(i==0){
+                $('#carouselInfo').append(
+                    `<div class="carousel-item active">
+                        <div class="cards-wrapper">
+    
+                            <div class="card text-bg-light mb-3" style="width: 10rem;">
+                                <div class="card-body">
+                                    <h5 class="card-title">${date.toLocaleDateString("en-GB")}</h5>
+                                    <h6>${date.toLocaleTimeString("en-GB")}</h6>
+                                    <img src="http://openweathermap.org/img/w/${result.data.list[i].weather[0].icon}.png" alt="${result.data.list[i].weather[0].description}">
+                                    <ul class="card-text">
+                                        <li>${Math.floor(result.data.list[i].main.temp)}&#8451</li>
+                                        <li>${result.data.list[i].weather[0].main}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            
+                            <div class="card text-bg-light mb-3" style="width: 10rem;">
+                                <div class="card-body">
+                                    <h5 class="card-title">${date2.toLocaleDateString("en-GB")}</h5>
+                                    <h6>${date2.toLocaleTimeString("en-GB")}</h6>
+                                    <img src="http://openweathermap.org/img/w/${result.data.list[i+1].weather[0].icon}.png" alt="${result.data.list[i+1].weather[0].description}">
+                                    <ul class="card-text">
+                                        <li>${Math.floor(result.data.list[i+1].main.temp)}&#8451</li>
+                                        <li>${result.data.list[i+1].weather[0].main}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                    
+                        </div>
+                    </div>`
+                    ); 
+            } else {
             $('#carouselInfo').append(
-                `<div class="carousel-item" id="carousel${i}">
+                `<div class="carousel-item">
                     <div class="cards-wrapper">
 
                         <div class="card text-bg-light mb-3" style="width: 10rem;">
@@ -389,56 +452,42 @@ function getWeather(latitude, longitude) {
                     </div>
                 </div>`
             )
-           
+            }
         }
         //Create color scheme for temperature chart
         for(let i=0; i<temperature.length; i++){
-            if(temperature[i]> 25){
-                bgroundColor.push('rgba(255, 0, 0, 0.8)')
-            }else if(temperature[i]> 20){
-                bgroundColor.push('rgba(255, 0, 0, 0.4)')
+            if(temperature[i]> 38){
+                //red
+                bgroundColor.push('rgba(255, 0, 0, 1)')
+            }else if(temperature[i]> 30){
+                //orange
+                bgroundColor.push('rgba(255, 113, 0, 1')                
+            }else if(temperature[i]> 25){
+                //orange-yellow
+                bgroundColor.push('rgba(255, 181, 0, 1)')
+            }else if(temperature[i]> 18){
+                //yellow
+                bgroundColor.push('rgba(255, 255, 0, 1)')
             } else if (temperature[i]>15){
-                bgroundColor.push('rgba(255, 252, 0, 0.6)')
+                //yellow-green
+                bgroundColor.push('rgba(171, 255, 0, 1)')
             } else if (temperature[i]>10){
-                bgroundColor.push('rgba(185, 227, 54, 0.61)')
+                //green
+                bgroundColor.push('rgba(0, 255, 124, 1)')
             } else if (temperature[i]>5){
-                bgroundColor.push('rgba(0, 0, 255, 1)')     
-            } else {
-                bgroundColor.push('rgba(0, 0, 255, 0.2)')    
+                //green-blue
+                bgroundColor.push('rgba(0, 255, 192, 1)')     
+            } else if (temperature[i]>0) {
+                //deep blue
+                bgroundColor.push('rgba(0, 75, 255, 1)')    
+            } else if(temperature[i] < 0){
+                //white
+                bgroundColor.push('rgba(107, 107, 255, 0.18)')
             }
         }
-        const ctx = $('#weatherChart');
-        const weatherChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: timeOfDay,
-                datasets: [{
-                    label: 'Temp in Celcius',
-                    data: temperature,
-                    backgroundColor: bgroundColor,
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                animations: {
-                    tension: {
-                        duration: 1000,
-                        easing: 'linear',
-                        from: 1,
-                        to: 0,
-                        loop: true
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: false
-                    }
-                }
-            }
-        })
+        weatherChart.update();
         // $('#indicator0').addClass("active")
         // $('#indicator0').attr("aria-current=true")
-        $('#carousel0').addClass('active')
     }, function(error){
         console.error(error.responseText)
     })
@@ -505,6 +554,7 @@ function getFromRestCountries(iso) {
         $('#region > h6').html(`Region: ${result.data[0].region}`)
 
         getCurrencyInfo(currencyCode)
+        getCurrencyFluctuation(currencyCode)
     }, function(error){
         console.log(error.responseText)
     })
@@ -533,11 +583,41 @@ function getCurrencyInfo(currencyCode){
     }
     );
     $.when(contactOpenExchange).then(function(result){
+        console.log(result)
         const currencyValue = result.data.rates
         $("#currencyname").html(`Currency: ${currencyName}`)
         $("#vsthedollar").html(`1 US Dollar is worth: ${currencySymbol} ${Object.values(currencyValue)}`)
     }, function (error){
         console.log(error.responseText)
+    })
+
+}
+
+function getCurrencyFluctuation(currencyCode){
+    //Create date to show currency fluctuation over the past year:
+    const monthsOfTheYear = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    let today = new Date()
+    let day = today.getDate()
+    let month = today.getMonth()
+    if(month.toString().length == 1){
+        month = `0${month}`
+    }
+    let year = today.getFullYear()
+    let lastYear = year-1
+
+    let startDate = `${lastYear}-${month}-${day}`
+    let endDate = `${year}-${month}-${day}`
+
+    var contactExchangeApi = fetchAjax('Back/ExchangeRateFluctuation.php',
+    {
+        currencyCode,
+        startDate,
+        endDate
+    }
+    );
+    $.when(contactExchangeApi).then(function (result){
+        console.log(result);
+        $('#conversion').html(`Since ${day} of ${monthsOfTheYear[today.getMonth()]} last year the ${currencyCode} has fluctuated in value against the US Dollar by ${result.data.rates[currencyCode].change_pct}%`)
     })
 
 }
@@ -576,7 +656,7 @@ $(document).ready(function(){
                     //Set Latitude and Longitude
                     countrySelectData.lat = result.data.results[0].geometry.lat;
                     countrySelectData.lng = result.data.results[0].geometry.lng;
-                    console.log(`HERE: ${countrySelectData.lat}, ${countrySelectData.lng}`)
+
                     //Populate Weather Info
                     getWeather(countrySelectData.lat, countrySelectData.lng)
                     getFromRestCountries(currentCountryIso)

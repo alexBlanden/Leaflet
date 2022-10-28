@@ -1,10 +1,15 @@
 <?php
 
-$app_id = 'db91db74a2034b4a95632e22ee956a69';
-$url = "https://openexchangerates.org/api/latest.json?app_id=" . $app_id . "&symbols=" . $_REQUEST['currencyCode'].'&symbols=gbp,eur,hkd,jpy';
+$apikey = 'YpGK6DiLKwdsdUcQ7L6P2oKM4AID3UgE';
+$url = "https://api.apilayer.com/exchangerates_data/fluctuation?start_date=".$_REQUEST['startDate'].'&end_date='.$_REQUEST['endDate'].'&base=USD&symbols='.$_REQUEST['currencyCode'];
 
 // Open CURL session:
 $ch = curl_init();
+
+curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+    "Content-Tpye: texy/plain",
+    "apikey: $apikey"
+));
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_URL, $url);
@@ -18,7 +23,7 @@ $decode = json_decode($result, true);
 
 
 $output['status']['code'] = '200';
-$output['status']['name'] = 'openExchangeResult';
+$output['status']['name'] = 'exchangeFluctuationResult';
 $output['status']['description'] = 'success';
 $output['data'] = $decode;
 

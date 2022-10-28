@@ -75,6 +75,7 @@
                       <!-- <div class="carousel-indicators" id="indicators">
                       </div> -->
                       <div class="carousel-inner" id="carouselInfo">
+                        
                       </div>
                       <button class="carousel-control-prev" type="button" data-bs-target="#weatherCarousel" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -123,6 +124,31 @@
             </div>
           </div>
 
+          <div class="modal fade" tabindex="-1" id="currencyModal">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="currency">Currency</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="currencyBody">
+                    <div id="currencyContainer">
+                        <ul>
+                          <div id="currencyContainer">
+                            <li id="currencyname"></li>
+                            <li id="vsthedollar"></li>
+                        </div>
+                        </ul>
+                        <p id="conversion"></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div id="map" class="rounded">
           </div> 
 
@@ -135,10 +161,6 @@
           </nav>
          
         <div class="offcanvas offcanvas-start overflow-auto" tabindex="-1" id="countryinfo" aria-labelledby="sidebar-label">
-            <div id="currencyContainer">
-                <li id="currencyname"></li>
-                <li id="vsthedollar"></li>
-            </div>
         </div>
         <script src="Front/node_modules/leaflet-easybutton/src/easy-button.js"></script>
         <script src="https://kit.fontawesome.com/8b56d6a893.js" crossorigin="anonymous"></script>
