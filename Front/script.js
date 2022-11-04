@@ -215,8 +215,10 @@ function getNews(iso){
 }
 
 function getDataFromCoordinates(lat,lng) {
+    
     $('#factsloading').show(2000)
-    $('#factscontainer').hide(2000)
+    $('#countryBody').hide(2000)
+
     var contactOpenCage = fetchAjax(
     'Back/OpenCage.php',
     {
@@ -225,14 +227,14 @@ function getDataFromCoordinates(lat,lng) {
     }
 );
 $.when(contactOpenCage).then(function(result){
+    $('#countryBody').show(2000);
+    $('#factsloading').hide();
     //saves iso and country name from returned data
     initialLocationData.isoA2 = result.data.results[0].components.country_code;
     initialLocationData.countryName = result.data.results[0].components.state;
 
     $("#country").html(`${initialLocationData.countryName}`);
     $("#drives > h6").html(`Drive on the ${result.data.results[0].annotations.roadinfo.drive_on}`);
-    $('#factscontainer').show(2000);
-    $('#factsloading').hide(2000);
 
     //Defined on line 318
     getFromRestCountries(initialLocationData.isoA2)
