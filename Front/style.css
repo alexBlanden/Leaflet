@@ -42,3 +42,40 @@ a {
     background-image: url('./assets/pexels-francesco-ungaro-281260.jpg');
     background-size: 115%;
 } */
+
+#countryBody {
+    position: relative;
+}
+
+#countryBody::before{
+    content: "";
+    background-image: url('./assets/Simple_world_map.svg');
+    position: absolute;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    opacity: 0.1;
+}
+
+#factsContainer ul{
+    position: relative;
+    color: black;
+}
+
+#weatherHeader {
+    background-image: url('./assets/sky.jpg');
+    background-position: center;
+}
+
+#weatherTitle, #currency {
+    color: aliceblue;
+}
+
+#currencyHeader {
+    background-image: url('./assets/finance.jpg');
+    background-position: center;
+}

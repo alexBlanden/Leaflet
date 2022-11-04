@@ -167,7 +167,7 @@ function loadMap () {
         L.circle([lat, lng], {radius: 500}).addTo(map);
     
 }
-//loadMap called as part of success callback uses initial location to get country borders and rest coutries api data
+
 function loadLocation () {
     //Save intial coordinates as local variables
     const lat = initialLocationData.lat;
@@ -215,6 +215,8 @@ function getNews(iso){
 }
 
 function getDataFromCoordinates(lat,lng) {
+    $('#factsloading').show(2000)
+    $('#factscontainer').hide(2000)
     var contactOpenCage = fetchAjax(
     'Back/OpenCage.php',
     {
@@ -227,8 +229,10 @@ $.when(contactOpenCage).then(function(result){
     initialLocationData.isoA2 = result.data.results[0].components.country_code;
     initialLocationData.countryName = result.data.results[0].components.state;
 
-    $("#country").html(`${initialLocationData.countryName}`)
-    $("#drives > h6").html(`Drive on the ${result.data.results[0].annotations.roadinfo.drive_on}`)
+    $("#country").html(`${initialLocationData.countryName}`);
+    $("#drives > h6").html(`Drive on the ${result.data.results[0].annotations.roadinfo.drive_on}`);
+    $('#factscontainer').show(2000);
+    $('#factsloading').hide(2000);
 
     //Defined on line 318
     getFromRestCountries(initialLocationData.isoA2)
@@ -360,8 +364,6 @@ function getPlacesOfInterest (bbox) {
     })
 }
 
-//Uses latitude and longitude to add data to initialLocation object
-
 //Uses coordinates to get weather info for lat/lng
 function getWeather(latitude, longitude) {
     var contactOpenWeather = fetchAjax (
@@ -373,6 +375,7 @@ function getWeather(latitude, longitude) {
     );
     $.when(contactOpenWeather).then(function(result){
         $('#carouselInfo').text("")
+        $('#indicators').text("")
         console.log(result)
         //Clear arrays used for weatherChart:
         timeOfDay.length = 0;
@@ -393,7 +396,7 @@ function getWeather(latitude, longitude) {
     
                             <div class="card text-bg-light mb-3" style="width: 10rem;">
                                 <div class="card-body">
-                                    <h5 class="card-title">${date.toLocaleDateString("en-GB")}</h5>
+                                    <h6 class="card-title">${date.toLocaleDateString("en-GB")}</h6>
                                     <h6>${date.toLocaleTimeString("en-GB")}</h6>
                                     <img src="http://openweathermap.org/img/w/${result.data.list[i].weather[0].icon}.png" alt="${result.data.list[i].weather[0].description}">
                                     <ul class="card-text">
@@ -406,7 +409,7 @@ function getWeather(latitude, longitude) {
                             
                             <div class="card text-bg-light mb-3" style="width: 10rem;">
                                 <div class="card-body">
-                                    <h5 class="card-title">${date2.toLocaleDateString("en-GB")}</h5>
+                                    <h6 class="card-title">${date2.toLocaleDateString("en-GB")}</h6>
                                     <h6>${date2.toLocaleTimeString("en-GB")}</h6>
                                     <img src="http://openweathermap.org/img/w/${result.data.list[i+1].weather[0].icon}.png" alt="${result.data.list[i+1].weather[0].description}">
                                     <ul class="card-text">
@@ -419,6 +422,8 @@ function getWeather(latitude, longitude) {
                         </div>
                     </div>`
                     ); 
+                    $('#indicators').html(`<button type="button" data-bs-target="#carouselInfo" data-bs-slide-to="${i}" class="active" aria-current="true" aria-label="Slide ${i+1}"></button>
+                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="${i+1}" aria-label="Slide ${i+2}"></button>`)
             } else {
             $('#carouselInfo').append(
                 `<div class="carousel-item">
@@ -426,7 +431,7 @@ function getWeather(latitude, longitude) {
 
                         <div class="card text-bg-light mb-3" style="width: 10rem;">
                             <div class="card-body">
-                                <h5 class="card-title">${date.toLocaleDateString("en-GB")}</h5>
+                                <h6 class="card-title">${date.toLocaleDateString("en-GB")}</h6>
                                 <h6>${date.toLocaleTimeString("en-GB")}</h6>
                                 <img src="http://openweathermap.org/img/w/${result.data.list[i].weather[0].icon}.png" alt="${result.data.list[i].weather[0].description}">
                                 <ul class="card-text">
@@ -439,7 +444,7 @@ function getWeather(latitude, longitude) {
                         
                         <div class="card text-bg-light mb-3" style="width: 10rem;">
                             <div class="card-body">
-                                <h5 class="card-title">${date2.toLocaleDateString("en-GB")}</h5>
+                                <h6 class="card-title">${date2.toLocaleDateString("en-GB")}</h6>
                                 <h6>${date2.toLocaleTimeString("en-GB")}</h6>
                                 <img src="http://openweathermap.org/img/w/${result.data.list[i+1].weather[0].icon}.png" alt="${result.data.list[i+1].weather[0].description}">
                                 <ul class="card-text">
@@ -452,6 +457,8 @@ function getWeather(latitude, longitude) {
                     </div>
                 </div>`
             )
+            $('#indicators').append(`<button type="button" data-bs-target="#carouselInfo" data-bs-slide-to="${i}" aria-current="true" aria-label="Slide ${i+1}"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="${i+1}" aria-label="Slide ${i+2}"></button>`)
             }
         }
         //Create color scheme for temperature chart
@@ -534,12 +541,13 @@ function getFromRestCountries(iso) {
         }
     );
     $.when(contactRestCountries).then(function(result){
+        console.log(result)
         $("#flag").attr({
             src:`https://flagcdn.com/w320/${iso.toLowerCase()}.png`,
             height: '45px'
         })
         $("#country").html(`${result.data[0].name.common}`)
-        $("#population > h6").html(`Population: ${conovertPopulationToString(result.data[0].population)}`)
+        $("#population > h6").html(`Population: ${convertPopulationToString(result.data[0].population)}`)
         $("#capitalcity > h6").html(`Capital City: ${result.data[0].capital}`)
         currencyCode = Object.keys(result.data[0].currencies)[0];
         currencySymbol = result.data[0].currencies[currencyCode].symbol
@@ -559,8 +567,8 @@ function getFromRestCountries(iso) {
         console.log(error.responseText)
     })
 }
-//Utility function
-function conovertPopulationToString(number) {
+//Utility functions
+function convertPopulationToString(number) {
     const string = number.toString()
     const length = string.length
     if(length < 7){
@@ -576,17 +584,30 @@ function conovertPopulationToString(number) {
     }
 }
 
+// function loadPreLoader (id){
+//     $(id).html(`<div class="d-flex align-items-center">
+//     <strong>Loading</strong>
+//     <div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
+//   </div>`)
+// }
+function removePreLoader (id){
+    $(`#${id}`).remove();
+}
+
 function getCurrencyInfo(currencyCode){
+    // loadPreLoader('#currencyBody', 'currencyPreLoader')
     var contactOpenExchange = fetchAjax('Back/ExchangeRates.php',
     {
         currencyCode
     }
     );
     $.when(contactOpenExchange).then(function(result){
+        removePreLoader('currencyPreLoader')
         console.log(result)
         const currencyValue = result.data.rates
-        $("#currencyname").html(`Currency: ${currencyName}`)
-        $("#vsthedollar").html(`1 US Dollar is worth: ${currencySymbol} ${Object.values(currencyValue)}`)
+        setTimeout(()=>{
+        $("#currencyname").html(`<h4>Currency: ${currencyName}(${currencySymbol})</h4>`)
+        $("#vsthedollar").html(`<h5>1 US Dollar is worth: ${currencySymbol}${Object.values(currencyValue)}</h5>`)}, 8000)
     }, function (error){
         console.log(error.responseText)
     })
@@ -599,6 +620,9 @@ function getCurrencyFluctuation(currencyCode){
     let today = new Date()
     let day = today.getDate()
     let month = today.getMonth()
+    if(day.toString().length == 1){
+        day = `0${day}`
+    }
     if(month.toString().length == 1){
         month = `0${month}`
     }
@@ -607,6 +631,7 @@ function getCurrencyFluctuation(currencyCode){
 
     let startDate = `${lastYear}-${month}-${day}`
     let endDate = `${year}-${month}-${day}`
+    console.log(startDate)
 
     var contactExchangeApi = fetchAjax('Back/ExchangeRateFluctuation.php',
     {
@@ -617,7 +642,9 @@ function getCurrencyFluctuation(currencyCode){
     );
     $.when(contactExchangeApi).then(function (result){
         console.log(result);
-        $('#conversion').html(`Since ${day} of ${monthsOfTheYear[today.getMonth()]} last year the ${currencyCode} has fluctuated in value against the US Dollar by ${result.data.rates[currencyCode].change_pct}%`)
+        $('#conversion').html(`Since ${day} of ${monthsOfTheYear[today.getMonth()]} last year the ${currencyCode} has fluctuated in value against the US Dollar by ${Math.abs(result.data.rates[currencyCode].change_pct)}%`)
+    }, function (err) {
+        console.log(err.responseText);
     })
 
 }

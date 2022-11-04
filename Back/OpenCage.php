@@ -5,16 +5,13 @@ ini_set('display_errors', 'On');
 error_reporting(E_ALL);
 
 // Require additional classes using Composer and use Dotenv to easily load environment variables and access API keys from .env file:
-require __DIR__ . '\vendor\autoload.php';
+require __DIR__ . '/vendor/autoload.php';
 $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-// $map_tiler_API = $_ENV['map_tiler_API'];
+$apiKey = $_ENV['open_cage_API'];
 
-// $open_cage_API = $_ENV['open_cage_API'];
-
-
-$url = 'https://api.opencagedata.com/geocode/v1/json?q='.$_REQUEST['lat'].','.$_REQUEST['lng'].'&pretty=1&key=67db27e8a6694f80b31ed9eec629c0d1';    
+$url = 'https://api.opencagedata.com/geocode/v1/json?q='.$_REQUEST['lat'].','.$_REQUEST['lng'].'&pretty=1&key='.$apiKey;    
 
 //Curl Session:
 

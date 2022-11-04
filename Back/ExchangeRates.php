@@ -1,5 +1,11 @@
 <?php
 
+require __DIR__ . '/vendor/autoload.php';
+$dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+$app_id = $_ENV['open_exchange_id'];
+
 $app_id = 'db91db74a2034b4a95632e22ee956a69';
 $url = "https://openexchangerates.org/api/latest.json?app_id=" . $app_id . "&symbols=" . $_REQUEST['currencyCode'].'&symbols=gbp,eur,hkd,jpy';
 
