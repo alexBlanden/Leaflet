@@ -44,24 +44,24 @@
                 <img src="" alt="" id="flag">
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
-              <div class="d-flex align-items-center" id="factsloading">
+              <div class="align-items-center loading-screen" id="factsloading">
                 <strong>Loading</strong>
                 <div class="spinner-border ms-auto" role="status" aria-hidden="true">
                 </div>
-              <div class="modal-body" id="countryBody">
-                </div>
-                  <div id="factscontainer">
-                      <ul>
-                          <li id="population"><h6>Population:</h6></li>
-                          <li id="capitalcity"><h6>Capital City:</h6></li>
-                          <li id="language"><h6>Language:</h6></li>
-                          <li id="region"><h6>Region</h6></li>
-                          <li id="drives"><h6>Drive on the</h6></li>
-                      </ul>
-                  </div>
               </div>
-                <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <div class="modal-body" id="countryBody">
+                <div id="factscontainer">
+                  <ul>
+                      <li id="population"><h6>Population:</h6></li>
+                      <li id="capitalcity"><h6>Capital City:</h6></li>
+                      <li id="language"><h6>Language:</h6></li>
+                      <li id="region"><h6>Region</h6></li>
+                      <li id="drives"><h6>Drive on the</h6></li>
+                  </ul>
+                </div>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
               </div>
             </div>
           </div>
@@ -70,12 +70,19 @@
         <div class="modal fade modal-lg" tabindex="-1" id="weatherModal">
             <div class="modal-dialog">
               <div class="modal-content">
+
                 <div class="modal-header" id="weatherHeader">
                   <h5 class="modal-title" id="weatherTitle">Weather</h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
 
+                <div class="modal-body">
+                  <div class="align-items-center loading-screen" id="weatherLoading">
+                    <strong>Loading</strong>
+                    <div class="spinner-border ms-auto" role="status" aria-hidden="true">
+                    </div>
+                  </div>
+                  <section id="weatherInfo">
                     <div id="weatherCarousel" class="carousel carousel-dark slide" data-bs-ride="carousel">
                       <div class="carousel-indicators" id="indicators">
                       </div>
@@ -94,7 +101,9 @@
                     <div>
                       <canvas id="weatherChart"></canvas>
                     </div>
+                  </section>
                 </div>
+
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
@@ -132,24 +141,34 @@
           <div class="modal fade" tabindex="-1" id="currencyModal">
             <div class="modal-dialog">
               <div class="modal-content">
+
                 <div class="modal-header" id="currencyHeader">
-                  <h5 class="modal-title" id="currency">Currency</h5>
+                  <h3 class="modal-title" id="currency">Currency</h3>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+
                 <div class="modal-body" id="currencyBody">
-                    <div id="currencyContainer">
-                        <ul>
-                          <div id="currencyContainer">
-                            <li id="currencyname"></li>
-                            <li id="vsthedollar"></li>
-                        </div>
-                        </ul>
-                        <p id="conversion"></p>
+
+                  <div class="align-items-center loading-screen" id="currencyLoading">
+                    <strong>Loading</strong>
+                    <div class="spinner-border ms-auto" role="status" aria-hidden="true">
                     </div>
+                  </div>
+
+                  <div id="currencyContainer">
+                      <ul>
+                          <li id="currencyname"></li>
+                          <li id="vsthedollar"></li>
+                      </ul>
+                      <p id="conversion"></p>
+                  </div>
+
                 </div>
+
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
+
               </div>
             </div>
           </div>
@@ -164,14 +183,6 @@
             </select>
             </div>
           </nav>
-         
-          <!-- <div class="d-flex align-items-center">
-            <strong>Loading</strong>
-            <div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
-          </div> -->
-
-        <!-- <div class="offcanvas offcanvas-start overflow-auto" tabindex="-1" id="countryinfo" aria-labelledby="sidebar-label">
-        </div> -->
         <script src="Front/node_modules/leaflet-easybutton/src/easy-button.js"></script>
         <script src="https://kit.fontawesome.com/8b56d6a893.js" crossorigin="anonymous"></script>
         <script src="Front/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

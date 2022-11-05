@@ -215,10 +215,6 @@ function getNews(iso){
 }
 
 function getDataFromCoordinates(lat,lng) {
-    
-    $('#factsloading').show(2000)
-    $('#countryBody').hide(2000)
-
     var contactOpenCage = fetchAjax(
     'Back/OpenCage.php',
     {
@@ -227,8 +223,6 @@ function getDataFromCoordinates(lat,lng) {
     }
 );
 $.when(contactOpenCage).then(function(result){
-    $('#countryBody').show(2000);
-    $('#factsloading').hide();
     //saves iso and country name from returned data
     initialLocationData.isoA2 = result.data.results[0].components.country_code;
     initialLocationData.countryName = result.data.results[0].components.state;
@@ -237,10 +231,10 @@ $.when(contactOpenCage).then(function(result){
     $("#drives > h6").html(`Drive on the ${result.data.results[0].annotations.roadinfo.drive_on}`);
 
     //Defined on line 318
-    getFromRestCountries(initialLocationData.isoA2)
+    getFromRestCountries(initialLocationData.isoA2);
     getNews(initialLocationData.isoA2);
     //Defined on line 125
-    drawInitialCountryBorders(initialLocationData.isoA2)
+    drawInitialCountryBorders(initialLocationData.isoA2);
 }, function(err){
     console.error(`Error:${err.responseText}`)
 });
@@ -368,6 +362,8 @@ function getPlacesOfInterest (bbox) {
 
 //Uses coordinates to get weather info for lat/lng
 function getWeather(latitude, longitude) {
+    $('#weatherInfo').hide()
+    $('#weatherLoading').show()
     var contactOpenWeather = fetchAjax (
         'Back/OpenWeather.php',
         {
@@ -495,6 +491,8 @@ function getWeather(latitude, longitude) {
             }
         }
         weatherChart.update();
+        $('#weatherLoading').hide()
+        $('#weatherInfo').show()
         // $('#indicator0').addClass("active")
         // $('#indicator0').attr("aria-current=true")
     }, function(error){
@@ -536,6 +534,8 @@ function getWeather(latitude, longitude) {
 
 //Use iso code to fetch data from RestCountries API, uses currency code to get data from currency api:
 function getFromRestCountries(iso) {
+    $('#factsloading').show()
+    $('#countryBody').hide()
     var contactRestCountries = fetchAjax(
         'Back/RestCountries.php',
         {
@@ -565,6 +565,11 @@ function getFromRestCountries(iso) {
 
         getCurrencyInfo(currencyCode)
         getCurrencyFluctuation(currencyCode)
+        setTimeout(()=> {
+            $('#countryBody').show(1000);
+            $('#factsloading').hide(1000);
+    
+        }, 2000)
     }, function(error){
         console.log(error.responseText)
     })
@@ -586,30 +591,24 @@ function convertPopulationToString(number) {
     }
 }
 
-// function loadPreLoader (id){
-//     $(id).html(`<div class="d-flex align-items-center">
-//     <strong>Loading</strong>
-//     <div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
-//   </div>`)
-// }
-function removePreLoader (id){
-    $(`#${id}`).remove();
-}
 
 function getCurrencyInfo(currencyCode){
-    // loadPreLoader('#currencyBody', 'currencyPreLoader')
+    $('#currencyLoading').show(1000);
+    $('#currencyContainer').hide();
+
     var contactOpenExchange = fetchAjax('Back/ExchangeRates.php',
     {
         currencyCode
     }
     );
     $.when(contactOpenExchange).then(function(result){
-        removePreLoader('currencyPreLoader')
         console.log(result)
         const currencyValue = result.data.rates
-        setTimeout(()=>{
         $("#currencyname").html(`<h4>Currency: ${currencyName}(${currencySymbol})</h4>`)
-        $("#vsthedollar").html(`<h5>1 US Dollar is worth: ${currencySymbol}${Object.values(currencyValue)}</h5>`)}, 8000)
+        $("#vsthedollar").html(`<h5>1 US Dollar is worth: ${currencySymbol}${Object.values(currencyValue)}</h5>`)
+
+        $('#currencyLoading').hide(1000);
+        $('#currencyContainer').show(1000);
     }, function (error){
         console.log(error.responseText)
     })

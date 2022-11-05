@@ -34,6 +34,10 @@ a {
     margin: 2px;
 }
 
+.loading-screen {
+    display: flex;
+}
+
 #selectContainer{
     width: 200px;
 }
@@ -71,11 +75,16 @@ a {
     background-position: center;
 }
 
-#weatherTitle, #currency {
+#weatherTitle, #currencyHeader{
     color: aliceblue;
 }
 
-#currencyHeader {
+#currencyHeader{
     background-image: url('./assets/finance.jpg');
-    background-position: center;
+    background-repeat: no-repeat;
+    background-position: center 1rem;
+}
+
+#currencyHeader {
+    background-position: relative;
 }
