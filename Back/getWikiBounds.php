@@ -9,6 +9,8 @@ require __DIR__ . '/vendor/autoload.php';
 $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
+$username = $_ENV['geo_user_name'];
+
 //Maximum and Minimum Latitude and Longitude required for bounds box
 $north;
 $south;
@@ -30,7 +32,7 @@ if (array_key_exists('_northEast',$_REQUEST['bbox'])){
     $west = $_REQUEST['bbox']['southwest']['lng'];
 }
 
-$url = 'http://api.geonames.org/wikipediaBoundingBoxJSON?north='.$north.'&south='.$south.'&east='.$east.'&west='.$west.'&username=blanden&style=full&maxRows=100';
+$url = 'http://api.geonames.org/wikipediaBoundingBoxJSON?north='.$north.'&south='.$south.'&east='.$east.'&west='.$west.'&username='.$username.'&style=full&maxRows=100';
 
 
 //Curl Session:
