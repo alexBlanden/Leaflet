@@ -1,7 +1,3 @@
-/* eslint-env jquery */
-
-// const { Chart } = require("chart.js");
-
 var fetchAjax = function (address, query) {
     return $.ajax({
         url: address,
@@ -11,7 +7,11 @@ var fetchAjax = function (address, query) {
     });
 }
 
+//Loading screen while waiting for user location
+$('#map, #country_menu').hide();
+$('#mapLoadingContainer').show();
 
+//Create Leaflet map
 var map = L.map("map");
 var mapStyle = {
     "fillColor": "#999595",
@@ -20,6 +20,7 @@ var mapStyle = {
     "color": "black",
     "dashArray": "20,10,5,5,5,10"
 }
+//Create Bootstrap 5 modals for country info
 var countryModal = new bootstrap.Modal($('#countryModal'));
 var weatherModal = new bootstrap.Modal($('#weatherModal'));
 var newsModal = new bootstrap.Modal($('#newsModal'));
@@ -31,8 +32,6 @@ var currencySymbol;
 var currencyCode;
 var languages;
 var boundingBox = {};
-// var layerControl;
-// var featureGroup;
 
 var initialLocationData = {
     lat:"",
@@ -100,17 +99,15 @@ const weatherChart = new Chart(ctx, {
         }
     }
 })
-// var countrySelect
-// var countrySelectLat
-// var countrySelectLng
-// var countrySelectIso
 
 var mapBorder = null;
-let markers = L.markerClusterGroup()
+let markers = L.markerClusterGroup();
 
 
-//If getCurrentPosition is successful, load as appropriate. If not, default to Brussels 
+//If user location known, load as appropriate. 
 const success = (position) => {
+    $('#mapLoadingContainer').hide();
+    $('#map, #country_menu').show();
     //assign initial location data coordinates
     initialLocationData.lat =  position.coords.latitude;
     initialLocationData.lng = position.coords.longitude;
@@ -121,12 +118,16 @@ const success = (position) => {
     getWeather(initialLocationData.lat,initialLocationData.lng);
     getDataFromCoordinates(initialLocationData.lat,initialLocationData.lng);
 }
+
+//If not, default to Brussels.
 const fail = () => {
     loadMap();
-    // getDataFromCoordinates(50.8476, 4.3572);
     getWeather(50.8476, 4.3572);
     drawInitialCountryBorders('BE');
     loadEasyButtons();
+    getNews('BE');
+    getFromRestCountries('BE');
+
 }
 
 function loadEasyButtons () {
@@ -153,6 +154,8 @@ navigator.geolocation.getCurrentPosition(success, fail)
 
 
 function loadMap () {
+    $('#mapLoadingContainer').hide();
+    $('#map, #country_menu').show();
     const lat = 50.8476;
     const lng = 4.3572;
     map.setView([lat, lng], 5)
@@ -186,7 +189,10 @@ function loadLocation () {
         L.circle([lat, lng], {radius: 500}).addTo(map);
 }
 
+//News sotries API data used to populate table in news easy button.
 function getNews(iso){
+    $('#newsloading').show();
+    $('#newsTable').hide();
     var contactNewsAPI = fetchAjax(
         'Back/newsAPI.php',
         {
@@ -209,11 +215,16 @@ function getNews(iso){
             <td><a href="${result.data.articles[i].url}" target="_BLANK">${result.data.articles[i].source.Name}</a></td>
           </tr>`
         )}
+
+    $('#newsTable').show(1000);
+    $('#newsloading').hide(1000);
+
     }, function (error) {
         console.log(error.responseText)
     })
 }
 
+//Determines country & country ISO code from user coordinates & uses data to fetch news items, country borders and general country facts. 
 function getDataFromCoordinates(lat,lng) {
     var contactOpenCage = fetchAjax(
     'Back/OpenCage.php',
@@ -226,20 +237,21 @@ $.when(contactOpenCage).then(function(result){
     //saves iso and country name from returned data
     initialLocationData.isoA2 = result.data.results[0].components.country_code;
     initialLocationData.countryName = result.data.results[0].components.state;
-
-    $("#country").html(`${initialLocationData.countryName}`);
+    //Populate
+    // $("#country").html(`${initialLocationData.countryName}`);
     $("#drives > h6").html(`Drive on the ${result.data.results[0].annotations.roadinfo.drive_on}`);
 
-    //Defined on line 318
+    
     getFromRestCountries(initialLocationData.isoA2);
     getNews(initialLocationData.isoA2);
-    //Defined on line 125
     drawInitialCountryBorders(initialLocationData.isoA2);
 }, function(err){
     console.error(`Error:${err.responseText}`)
 });
 }
 
+
+//initialCountryBorders uses Leaflet getBounds method to determine boundaries needed for places of interest markers.
 function drawInitialCountryBorders (iso) {
     var countryBorders = fetchAjax(
         `Back/geoJsonCoordinates.php`,
@@ -259,6 +271,7 @@ function drawInitialCountryBorders (iso) {
     })
 }
 
+//Countries selected fomr dropdown menu use iso code to determine boundaryt needed for places of interest.
 function drawCountryBorders (iso) {
     var countryBorders = fetchAjax(
         `Back/geoJsonCoordinates.php`,
@@ -291,8 +304,9 @@ function getPlacesOfInterest (bbox) {
         }
     );
     $.when(placesOfInterest).then(function(result){
-        if(!result.data){
-            alert("Sorry Places of interest API unavailable")
+        console.log(result)
+        if(!result.data.status || result.data.status == 13){
+            alert("Sorry Places of interest API unavailable. Please try again.")
         }
         //result needs to be geoJson
         var resultAsJson = {
@@ -302,9 +316,8 @@ function getPlacesOfInterest (bbox) {
             ]
         }
 
-        if(resultAsJson.features.length > 0){
-            resultAsJson.features.length = 0;
-            }
+        resultAsJson.features.length = 0;
+            
         
         //For loop pushes geojson objects to resultAsJson array
         for(let i= 0; i < result.data.geonames.length; i++){
@@ -325,7 +338,6 @@ function getPlacesOfInterest (bbox) {
             )
         }
        //Create markers layer    
-    //    markers = L.markerClusterGroup();
        markers.clearLayers();
             
         const geojsonMarkerOptions = {
@@ -356,7 +368,7 @@ function getPlacesOfInterest (bbox) {
         map.addLayer(markers);
 
     }, function(err){
-        alert('Sorry, API did not respond, please try again.')
+        alert(`Error! ${err.responseText}`);
     })
 }
 
@@ -386,7 +398,7 @@ function getWeather(latitude, longitude) {
             timeOfDay.push(date.toLocaleTimeString("en-GB"), date2.toLocaleTimeString("en-GB"));
             temperature.push(result.data.list[i].main.temp, result.data.list[i+1].main.temp)
             
-            //Add bootstrap info cards to carousel.
+            //Add bootstrap info cards to carousel. First card needs class of "Active" added:
             if(i==0){
                 $('#carouselInfo').append(
                     `<div class="carousel-item active">
@@ -491,12 +503,10 @@ function getWeather(latitude, longitude) {
             }
         }
         weatherChart.update();
-        $('#weatherLoading').hide()
-        $('#weatherInfo').show()
-        // $('#indicator0').addClass("active")
-        // $('#indicator0').attr("aria-current=true")
+        $('#weatherLoading').hide();
+        $('#weatherInfo').show();
     }, function(error){
-        console.error(error.responseText)
+        console.error(error.responseText);
     })
     
 }
@@ -704,26 +714,22 @@ $(document).ready(function(){
 
 });
 
-// $("#layers").click(function (){
-//     markers.removelayer(featureData)
-// })
-
 
 // CSS blur effect:
-$(document).ready(function(){
-    $(".mylinks").click(function (){
-        $("#map, nav").css("filter","blur(25px)")
-    })
+// $(document).ready(function(){
+//     $(".mylinks").click(function (){
+//         $("#map, nav").css("filter","blur(25px)")
+//     })
     
-    $('#map').mouseover(function(){
-        $("#map, nav").css("filter","");
-    })
+//     $('#map').mouseover(function(){
+//         $("#map, nav").css("filter","");
+//     })
 
-    $('#map').on({'touchstart' : function(){
-        $("#map, nav").css("filter","");
-    }})
+//     $('#map').on({'touchstart' : function(){
+//         $("#map, nav").css("filter","");
+//     }})
 
-    $('.btn-close').click(function(){
-        $("#map, nav").css("filter","");
-    })
-})
+//     $('.btn-close').click(function(){
+//         $("#map, nav").css("filter","");
+//     })
+// })

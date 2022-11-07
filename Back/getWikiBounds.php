@@ -5,12 +5,9 @@ ini_set('display_errors', 'On');
 error_reporting(E_ALL);
 
 // // Require additional classes using Composer and use Dotenv to easily load environment variables and access API keys from .env file:
-require __DIR__ . '\vendor\autoload.php';
+require __DIR__ . '/vendor/autoload.php';
 $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
-
-
-// $testData = json_decode($_REQUEST['bbox']);
 
 //Maximum and Minimum Latitude and Longitude required for bounds box
 $north;

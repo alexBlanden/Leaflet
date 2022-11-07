@@ -88,3 +88,9 @@ a {
 #currencyHeader {
     background-position: relative;
 }
+
+#mapLoadingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

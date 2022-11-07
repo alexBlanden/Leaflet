@@ -119,6 +119,11 @@
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body modal-dialog-scrollable">
+                  <div class="align-items-center loading-screen" id="newsloading">
+                    <strong>Loading</strong>
+                    <div class="spinner-border ms-auto" role="status" aria-hidden="true">
+                    </div>
+                  </div>
                   <table class="table table-striped table-hover" id="newsTable">
                     <thead>
                       <tr>
@@ -171,6 +176,16 @@
 
               </div>
             </div>
+          </div>
+          <!-- <div id="mapLoadingContainer">
+            <div class="spinner-border" role="status" id="mapLoading">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div> -->
+          <div id="mapLoadingContainer" class="container-fluid vh-100">
+            <div class="spinner-border text-dark" role="status" id="spinner">
+              <span class="visually-hidden">Loading...</span>
+            </div> 
           </div>
 
           <div id="map" class="rounded">
