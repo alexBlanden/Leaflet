@@ -38,6 +38,10 @@ a {
     display: flex;
 }
 
+.white-btn {
+    color: aliceblue;
+}
+
 #selectContainer{
     width: 200px;
 }

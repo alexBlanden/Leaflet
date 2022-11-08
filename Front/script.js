@@ -20,12 +20,6 @@ var mapStyle = {
     "color": "black",
     "dashArray": "20,10,5,5,5,10"
 }
-//Create Bootstrap 5 modals for country info
-var countryModal = new bootstrap.Modal($('#countryModal'));
-var weatherModal = new bootstrap.Modal($('#weatherModal'));
-var newsModal = new bootstrap.Modal($('#newsModal'));
-var currencyModal = new bootstrap.Modal($('#currencyModal'));
-
 
 var currencyName;
 var currencySymbol;
@@ -65,7 +59,15 @@ var countrySelectData = {
     currencyCode: ""
 }
 
-//Chart Data
+var mapBorder = null;
+let markers = L.markerClusterGroup();
+//Create Bootstrap 5 modals for country info
+var countryModal = new bootstrap.Modal($('#countryModal'));
+var weatherModal = new bootstrap.Modal($('#weatherModal'));
+var newsModal = new bootstrap.Modal($('#newsModal'));
+var currencyModal = new bootstrap.Modal($('#currencyModal'));
+
+//Weather Chart and Chart Data
 const timeOfDay = [];
 const temperature = [];
 const bgroundColor = [];
@@ -99,9 +101,6 @@ const weatherChart = new Chart(ctx, {
         }
     }
 })
-
-var mapBorder = null;
-let markers = L.markerClusterGroup();
 
 
 //If user location known, load as appropriate. 
@@ -189,7 +188,7 @@ function loadLocation () {
         L.circle([lat, lng], {radius: 500}).addTo(map);
 }
 
-//News sotries API data used to populate table in news easy button.
+//News sotries API data used to populate table in news modal.
 function getNews(iso){
     $('#newsloading').show();
     $('#newsTable').hide();
@@ -220,7 +219,7 @@ function getNews(iso){
     $('#newsloading').hide(1000);
 
     }, function (error) {
-        ""(error.responseText)
+        console.log(error.responseText)
     })
 }
 
@@ -250,7 +249,6 @@ $.when(contactOpenCage).then(function(result){
 });
 }
 
-
 //initialCountryBorders uses Leaflet getBounds method to determine boundaries needed for places of interest markers.
 function drawInitialCountryBorders (iso) {
     var countryBorders = fetchAjax(
@@ -271,7 +269,7 @@ function drawInitialCountryBorders (iso) {
     })
 }
 
-//Countries selected from dropdown menu use iso code to determine boundaryt needed for places of interest.
+//Countries selected from dropdown menu use iso code to determine boundaries needed for places of interest.
 function drawCountryBorders (iso) {
     var countryBorders = fetchAjax(
         `Back/geoJsonCoordinates.php`,
@@ -304,6 +302,7 @@ function getPlacesOfInterest (bbox) {
         }
     );
     $.when(placesOfInterest).then(function(result){
+        //API is temperamental
         if(!result.data.geonames || result.data.status == 13){
             alert("Sorry Places of interest API unavailable. Please try again.")
         }
@@ -389,7 +388,8 @@ function getWeather(latitude, longitude) {
         timeOfDay.length = 0;
         temperature.length = 0;
         bgroundColor.length = 0;
-    
+        
+        //Iterate over result array and append bootstrap info cards to bootstrap carousel in weather modal. Cards added in pairs:
         for(let i = 0; i<result.data.list.length; i+=2){
             let date = new Date(result.data.list[i].dt * 1000);
             let date2 = new Date(result.data.list[i+1].dt * 1000);
@@ -465,6 +465,7 @@ function getWeather(latitude, longitude) {
                     </div>
                 </div>`
             )
+            
             $('#indicators').append(`<button type="button" data-bs-target="#carouselInfo" data-bs-slide-to="${i}" aria-current="true" aria-label="Slide ${i+1}"></button>
             <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="${i+1}" aria-label="Slide ${i+2}"></button>`)
             }
@@ -500,6 +501,7 @@ function getWeather(latitude, longitude) {
                 bgroundColor.push('rgba(107, 107, 255, 0.18)')
             }
         }
+        //Update weathercahrt when new data is pushed to arrays
         weatherChart.update();
         $('#weatherLoading').hide();
         $('#weatherInfo').show();
@@ -550,7 +552,7 @@ function getFromRestCountries(iso) {
         console.log(error.responseText)
     })
 }
-//Utility functions
+//Utility function
 function convertPopulationToString(number) {
     const string = number.toString()
     const length = string.length
@@ -596,6 +598,7 @@ function getCurrencyFluctuation(currencyCode){
     let today = new Date()
     let day = today.getDate()
     let month = today.getMonth()
+    //Set date format for API
     if(day.toString().length == 1){
         day = `0${day}`
     }
