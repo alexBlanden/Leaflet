@@ -30,6 +30,7 @@
         
         <link rel="stylesheet" href="Front/style.css">
         <link rel="stylesheet" href="Front/node_modules/leaflet-easybutton/src/easy-button.css">
+        <link rel="stylesheet" href="Front/assets/fontawesome/css/all.min.css">
     </head>
     <body>
         <!--[if lt IE 7]>
@@ -177,20 +178,16 @@
               </div>
             </div>
           </div>
-          <!-- <div id="mapLoadingContainer">
-            <div class="spinner-border" role="status" id="mapLoading">
-              <span class="visually-hidden">Loading...</span>
-            </div>
-          </div> -->
+          <!-- Loading Screen: -->
           <div id="mapLoadingContainer" class="container-fluid vh-100">
             <div class="spinner-border text-dark" role="status" id="spinner">
               <span class="visually-hidden">Loading...</span>
             </div> 
           </div>
-
+          <!-- Map -->
           <div id="map" class="rounded">
           </div> 
-
+          <!-- Dropdown Country menu -->
           <nav class="fixed-top m-3">
             <div class="input-group mx-auto" id="selectContainer">
               <select class="form-select" id="country_menu">
@@ -199,7 +196,7 @@
             </div>
           </nav>
         <script src="Front/node_modules/leaflet-easybutton/src/easy-button.js"></script>
-        <script src="https://kit.fontawesome.com/8b56d6a893.js" crossorigin="anonymous"></script>
+        <!-- <script src="https://kit.fontawesome.com/8b56d6a893.js" crossorigin="anonymous"></script> -->
         <script src="Front/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
         <script src="Front/node_modules/chart.js/dist/chart.min.js"></script>
     </body>

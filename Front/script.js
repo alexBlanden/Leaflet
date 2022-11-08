@@ -139,7 +139,7 @@ function loadEasyButtons () {
         weatherModal.toggle();
     }).addTo(map)
 
-    L.easyButton('fa-dollar', function (btn, map){
+    L.easyButton('fa-dollar-sign', function (btn, map){
         currencyModal.toggle();
     }).addTo(map)
 
@@ -212,7 +212,7 @@ function getNews(iso){
             `<tr>
             <th scope="row">${i+1}</th>
             <td>${result.data.articles[i].title}</td>
-            <td><a href="${result.data.articles[i].url}" target="_BLANK">${result.data.articles[i].source.Name}</a></td>
+            <td><a href="${result.data.articles[i].url}" target="_BLANK">${result.data.articles[i].source.name}</a></td>
           </tr>`
         )}
 
@@ -220,7 +220,7 @@ function getNews(iso){
     $('#newsloading').hide(1000);
 
     }, function (error) {
-        console.log(error.responseText)
+        ""(error.responseText)
     })
 }
 
@@ -271,7 +271,7 @@ function drawInitialCountryBorders (iso) {
     })
 }
 
-//Countries selected fomr dropdown menu use iso code to determine boundaryt needed for places of interest.
+//Countries selected from dropdown menu use iso code to determine boundaryt needed for places of interest.
 function drawCountryBorders (iso) {
     var countryBorders = fetchAjax(
         `Back/geoJsonCoordinates.php`,
@@ -304,8 +304,7 @@ function getPlacesOfInterest (bbox) {
         }
     );
     $.when(placesOfInterest).then(function(result){
-        console.log(result)
-        if(!result.data.status || result.data.status == 13){
+        if(!result.data.geonames || result.data.status == 13){
             alert("Sorry Places of interest API unavailable. Please try again.")
         }
         //result needs to be geoJson
@@ -386,7 +385,6 @@ function getWeather(latitude, longitude) {
     $.when(contactOpenWeather).then(function(result){
         $('#carouselInfo').text("")
         $('#indicators').text("")
-        console.log(result)
         //Clear arrays used for weatherChart:
         timeOfDay.length = 0;
         temperature.length = 0;
@@ -511,37 +509,6 @@ function getWeather(latitude, longitude) {
     
 }
 
-
-
-// function getCountrySelectWeather (latitude, longitude) {
-//     var contactOpenWeather = fetchAjax (
-//         'Back/OpenWeather.php',
-//         {
-//             latitude,
-//             longitude
-//         }
-//     );
-//     $.when(contactOpenWeather).then(function(result){
-//         console.log(result)
-//         //Populate weather info.
-//         countrySelectData.weather.description = result.data.weather[0].description;
-//         countrySelectData.weather.icon = result.data.weather[0].icon
-//         countrySelectData.weather.temp = Math.floor(result.data.main.temp)
-//         countrySelectData.sunUp = new Date(result.data.sys.sunrise * 1000)
-//         countrySelectData.sunDown = new Date (result.data.sys.sunset * 1000)
-//         updateWeatherInfo(
-//             countrySelectData.weather.icon, 
-//             countrySelectData.weather.description,
-//             countrySelectData.weather.temp,
-//             countrySelectData.sunUp,
-//             countrySelectData.sunDown
-//             )
-//     }, function(error){
-//         console.error(error.responseText)
-//     })
-    
-// }
-
 //Use iso code to fetch data from RestCountries API, uses currency code to get data from currency api:
 function getFromRestCountries(iso) {
     $('#factsloading').show()
@@ -553,7 +520,6 @@ function getFromRestCountries(iso) {
         }
     );
     $.when(contactRestCountries).then(function(result){
-        console.log(result)
         $("#flag").attr({
             src:`https://flagcdn.com/w320/${iso.toLowerCase()}.png`,
             height: '45px'
@@ -612,7 +578,6 @@ function getCurrencyInfo(currencyCode){
     }
     );
     $.when(contactOpenExchange).then(function(result){
-        console.log(result)
         const currencyValue = result.data.rates
         $("#currencyname").html(`<h4>Currency: ${currencyName}(${currencySymbol})</h4>`)
         $("#vsthedollar").html(`<h5>1 US Dollar is worth: ${currencySymbol}${Object.values(currencyValue)}</h5>`)
@@ -642,7 +607,6 @@ function getCurrencyFluctuation(currencyCode){
 
     let startDate = `${lastYear}-${month}-${day}`
     let endDate = `${year}-${month}-${day}`
-    console.log(startDate)
 
     var contactExchangeApi = fetchAjax('Back/ExchangeRateFluctuation.php',
     {
@@ -652,7 +616,6 @@ function getCurrencyFluctuation(currencyCode){
     }
     );
     $.when(contactExchangeApi).then(function (result){
-        console.log(result);
         $('#conversion').html(`Since ${day} of ${monthsOfTheYear[today.getMonth()]} last year the ${currencyCode} has fluctuated in value against the US Dollar by ${Math.abs(result.data.rates[currencyCode].change_pct)}%`)
     }, function (err) {
         console.log(err.responseText);
@@ -713,23 +676,3 @@ $(document).ready(function(){
         })
 
 });
-
-
-// CSS blur effect:
-// $(document).ready(function(){
-//     $(".mylinks").click(function (){
-//         $("#map, nav").css("filter","blur(25px)")
-//     })
-    
-//     $('#map').mouseover(function(){
-//         $("#map, nav").css("filter","");
-//     })
-
-//     $('#map').on({'touchstart' : function(){
-//         $("#map, nav").css("filter","");
-//     }})
-
-//     $('.btn-close').click(function(){
-//         $("#map, nav").css("filter","");
-//     })
-// })

@@ -10,7 +10,7 @@ $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
 
-$apiKey= 'b3f3ea23e99c413fa4e6f6da8f889f38';
+$apiKey= $_ENV['news_api'];
 
 $url = "http://newsapi.org/v2/top-headlines?country=" . $_REQUEST['iso'] . "&apiKey=" . $apiKey;
 
@@ -29,11 +29,25 @@ curl_close($ch);
 
 $decode = json_decode($result, true);
 
+//Object keys need to be lowercase
+
+function array_change_key_case_recursive($arr)
+{
+    return array_map(function($item){
+        if(is_array($item))
+            $item = array_change_key_case_recursive($item);
+        return $item;
+    },array_change_key_case($arr));
+}
+
+$new_array = array_change_key_case_recursive($decode);
+
+
 
 $output['status']['code'] = '200';
 $output['status']['name'] = 'newsQueryResult';
 $output['status']['description'] = 'success';
-$output['data'] = $decode;
+$output['data'] = $new_array;
 
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json; charset=UTF-8');
