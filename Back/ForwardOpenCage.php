@@ -11,7 +11,6 @@ $dotenv->load();
 
 $openCageAPI = $_ENV['open_cage_API'];
 
-// //Plain Url for tsting purposes:
 $url = 'https://api.opencagedata.com/geocode/v1/json?q='.$_REQUEST['currentCountryName'].'&key='.$openCageAPI;   
 
 //Curl Session:

@@ -66,14 +66,16 @@ var countryModal = new bootstrap.Modal($('#countryModal'));
 var weatherModal = new bootstrap.Modal($('#weatherModal'));
 var newsModal = new bootstrap.Modal($('#newsModal'));
 var currencyModal = new bootstrap.Modal($('#currencyModal'));
+var holidaysModal = new bootstrap.Modal($('#holidaysModal'));
+var worldBankModal = new bootstrap.Modal($('#worldBankModal'));
 
 //Weather Chart and Chart Data
 const timeOfDay = [];
 const temperature = [];
 const bgroundColor = [];
 
-const ctx = $('#weatherChart');
-const weatherChart = new Chart(ctx, {
+const ctxWeather = $('#weatherChart');
+const weatherChart = new Chart(ctxWeather, {
     type: 'line',
     data: {
         labels: timeOfDay,
@@ -102,6 +104,172 @@ const weatherChart = new Chart(ctx, {
     }
 })
 
+//Health Expenditure Chart and chart data
+const healthExpenditureDate = [];
+const healthExpenditureValue = [];
+
+const ctxHealth = $('#healthChart');
+const healthChart = new Chart(ctxHealth, {
+    type: 'line',
+    data: {
+        labels: healthExpenditureDate,
+        datasets: [{
+            label: 'Health',
+            data: healthExpenditureValue,
+            borderWidth: 2,
+            borderColor: 'red',
+            fill: false,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+            },
+            legend: {
+                labels: {
+                    usePointStyle: true,
+                }
+            }
+        },
+        interaction: {
+            intersect: false,
+        },
+        scales: {
+            x: {
+                display: true,
+                title: {
+                    display: true,
+                    text: 'Year',
+                }
+            },
+            y: {
+                display: true,
+                title: {
+                    display: true,
+                    text: "%",
+                    font: {
+                        weight: 'bold'
+                    },
+                },
+                beginAtZero: true,
+            }
+        }
+    }
+})
+
+//Education Expenditure Chart and chart data
+const eduExpenditureDate = [];
+const eduExpenditureValue = [];
+
+const ctxEdu = $('#eduChart');
+const eduChart = new Chart(ctxEdu, {
+    type: 'line',
+    data: {
+        labels: eduExpenditureDate,
+        datasets: [{
+            label: 'Education',
+            data: eduExpenditureValue,
+            borderWidth: 2,
+            borderColor: 'blue',
+            fill: false,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+            },
+            legend: {
+                labels: {
+                    usePointStyle: true,
+                }
+            }
+        },
+        interaction: {
+            intersect: false,
+        },
+        scales: {
+            x: {
+                display: true,
+                title: {
+                    display: true,
+                    text: 'Year',
+                }
+            },
+            y: {
+                display: true,
+                title: {
+                    display: true,
+                    text: "% of GPD",
+                    font: {
+                        weight: 'bold'
+                    },
+                },
+                beginAtZero: true,
+            }
+        }
+    }
+})
+
+//Military Expenditure Chart and chart data
+const militaryExpenditureDate = [];
+const militaryExpenditureValue = [];
+
+const ctxMil = $('#militaryChart');
+const militaryChart = new Chart(ctxMil, {
+    type: 'line',
+    data: {
+        labels: militaryExpenditureDate,
+        datasets: [{
+            label: 'Military',
+            data: militaryExpenditureValue,
+            borderWidth: 2,
+            borderColor: 'green',
+            fill: false,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+            },
+            legend: {
+                labels: {
+                    usePointStyle: true,
+                }
+            }
+        },
+        interaction: {
+            intersect: false,
+        },
+        scales: {
+            x: {
+                display: true,
+                title: {
+                    display: true,
+                    text: 'Year',
+                }
+            },
+            y: {
+                display: true,
+                title: {
+                    display: true,
+                    text: "%",
+                    font: {
+                        weight: 'bold'
+                    },
+                },
+                beginAtZero: true,
+            }
+        }
+    }
+})
+
+
 
 //If user location known, load as appropriate. 
 const success = (position) => {
@@ -126,6 +294,7 @@ const fail = () => {
     loadEasyButtons();
     getNews('BE');
     getFromRestCountries('BE');
+    $("#drives > h6").html(`Drive on the right`);
 
 }
 
@@ -145,6 +314,14 @@ function loadEasyButtons () {
     L.easyButton("fa-newspaper", function(btn, map){
         newsModal.toggle();
     }).addTo(map)
+
+    L.easyButton('fa-calendar', function (btn, map){
+        holidaysModal.toggle();
+    }).addTo(map)
+
+    L.easyButton('fa-info', function (btn, map){
+        worldBankModal.toggle();
+    }).addTo(map);
 
 
 }
@@ -188,6 +365,49 @@ function loadLocation () {
         L.circle([lat, lng], {radius: 500}).addTo(map);
 }
 
+function getHolidays (iso) {
+    $('#holidaysLoading').show();
+    $('#holidaysTable').hide();
+    
+    const today = new Date();
+    const year = today.getFullYear();
+    var contactHolidaysAPI = fetchAjax(
+        'Back/holidaysAPI.php',
+        {
+            iso,
+            year
+        }
+    );
+    $.when(contactHolidaysAPI).then(function(result){
+        $('#holidaysTable').show();
+        $('#holidaysLoading').hide();
+       
+        console.log(result);
+        $('#holidaysBody').html("");
+        for(let i=0; i<result.data.length; i++){
+            if(result.data[i].counties){
+            $('#holidaysBody').append(
+                `<tr>
+                <th scope="row">${i+1}</th>
+                <td>${result.data[i].name} (${result.data[i].counties})</td>
+                <td>${result.data[i].localName}</td>
+                <td>${result.data[i].types[0]}</td>
+                <td>${result.data[i].date}</td>
+              </tr>`
+            )} else {
+                $('#holidaysBody').append(
+                    `<tr>
+                    <th scope="row">${i+1}</th>
+                    <td>${result.data[i].name}</td>
+                    <td>${result.data[i].localName}</td>
+                    <td>${result.data[i].types[0]}</td>
+                    <td>${result.data[i].date}</td>
+                  </tr>`
+            )}
+        }
+    })
+}
+
 //News sotries API data used to populate table in news modal.
 function getNews(iso){
     $('#newsloading').show();
@@ -203,7 +423,7 @@ function getNews(iso){
         $('#newsBody').html("")
         //Service not available in all countries
         if(!result.data.articles.length){
-            $('#newsBody').html("<tr><td></td><td>Sorry, news service unavailable</td><td></td></tr>")
+            $('#newsBody').html("<tr><td></td><td>Sorry, news service unavailable in some destinations</td><td></td></tr>")
         }
         //Iterate over articles array and append info to relevant section of newsModal
         for(let i= 0; i<result.data.articles.length; i++){
@@ -223,6 +443,73 @@ function getNews(iso){
     })
 }
 
+function getHealthExpenditure(iso){
+    $('#healthChart').hide();
+    var contactWorldBankHealth = fetchAjax(
+        'Back/WorldBankHealthData.php',
+        {
+            iso
+        }
+    );
+    $.when(contactWorldBankHealth).then(function (result){
+        healthExpenditureDate.length = 0;
+        healthExpenditureValue.length = 0;
+        for(let i=0; i<result.data.length; i++){
+            healthExpenditureDate.push(result.data[i].date);
+            healthExpenditureValue.push(result.data[i].value);
+        }
+        healthChart.update();
+        console.log(result);
+        $('#healthChart').show();
+    }, function (err){
+        console.log(err.responseText);
+    })
+}
+
+function getEduExpenditure(iso){
+    $('#educhart').hide();
+    var contactWorldBankEdu = fetchAjax(
+        'Back/WorldBankEducationData.php',
+        {
+            iso
+        }
+    );
+    $.when(contactWorldBankEdu).then(function (result){
+        eduExpenditureDate.length = 0;
+        eduExpenditureValue.length = 0;
+        for(let i=0; i<result.data.length; i++){
+            eduExpenditureDate.push(result.data[i].date);
+            eduExpenditureValue.push(result.data[i].value);
+        }
+        eduChart.update();
+        console.log(result);
+        $('#educhart').show();
+    }, function (err){
+        console.log(err.responseText);
+    })
+}
+
+function getMilitaryExpenditure(iso){
+    $('#militaryChart').hide();
+    var contactWorldBankMilitary = fetchAjax(
+        'Back/WorldBankMilitaryData.php',
+        {
+            iso
+        }
+    );
+    $.when(contactWorldBankMilitary).then(function (result) {
+        militaryExpenditureDate.length = 0;
+        militaryExpenditureValue.length = 0;
+        for(let i=0; i<result.data.length; i++){
+            militaryExpenditureDate.push(result.data[i].date);
+            militaryExpenditureValue.push(result.data[i].value);
+        }
+        militaryChart.update();
+        $('#militaryChart').show();
+        console.log(result);
+    })
+}
+
 //Determines country & country ISO code from user coordinates & uses data to fetch news items, country borders and general country facts. 
 function getDataFromCoordinates(lat,lng) {
     var contactOpenCage = fetchAjax(
@@ -237,13 +524,16 @@ $.when(contactOpenCage).then(function(result){
     initialLocationData.isoA2 = result.data.results[0].components.country_code;
     initialLocationData.countryName = result.data.results[0].components.state;
     //Populate
-    // $("#country").html(`${initialLocationData.countryName}`);
     $("#drives > h6").html(`Drive on the ${result.data.results[0].annotations.roadinfo.drive_on}`);
 
     
     getFromRestCountries(initialLocationData.isoA2);
     getNews(initialLocationData.isoA2);
     drawInitialCountryBorders(initialLocationData.isoA2);
+    getHolidays(initialLocationData.isoA2);
+    getHealthExpenditure(initialLocationData.isoA2);
+    getEduExpenditure(initialLocationData.isoA2);
+    getMilitaryExpenditure(initialLocationData.isoA2);
 }, function(err){
     console.error(`Error:${err.responseText}`)
 });
@@ -304,6 +594,7 @@ function getPlacesOfInterest (bbox) {
     $.when(placesOfInterest).then(function(result){
         //API is temperamental
         if(!result.data.geonames || result.data.status == 13){
+            markers.clearLayers();
             alert("Sorry Places of interest API unavailable. Please try again.")
         }
         //result needs to be geoJson
@@ -634,6 +925,7 @@ $(document).ready(function(){
             }
         );
         $.when(getGeoJson).then(function (result){
+            console.log(result)
             for(let i= 0; i < result.data.length; i++){
                 $('#country_menu').append(
                     `<option class="country_menu_select" value='{"iso":"${result.data[i].iso_a2}", "name":"${result.data[i].name}"}'>${result.data[i].name}</option>`)   
@@ -647,8 +939,9 @@ $(document).ready(function(){
                 countrySelectData.countryName = countryVal.name;
                 // const countrySelect = countryVal.name;
 
-                drawCountryBorders(currentCountryIso)
+                drawCountryBorders(currentCountryIso);
                 getNews(currentCountryIso);
+                getHolidays(currentCountryIso);
                 
                 //Perform forward Geocoding using country name
                 var contactOpenCageForward = fetchAjax(

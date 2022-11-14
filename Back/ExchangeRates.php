@@ -6,8 +6,7 @@ $dotenv->load();
 
 $app_id = $_ENV['open_exchange_id'];
 
-$app_id = 'db91db74a2034b4a95632e22ee956a69';
-$url = "https://openexchangerates.org/api/latest.json?app_id=" . $app_id . "&symbols=" . $_REQUEST['currencyCode'].'&symbols=gbp,eur,hkd,jpy';
+$url = "https://openexchangerates.org/api/latest.json?app_id=" . $app_id . "&symbols=" . $_REQUEST['currencyCode'];
 
 // Open CURL session:
 $ch = curl_init();

@@ -4,7 +4,7 @@
 ini_set('display_errors', 'On');
 error_reporting(E_ALL);
 
-// // Require additional classes using Composer and use Dotenv to easily load environment variables and access API keys from .env file:
+//Require additional classes using Composer and use Dotenv to easily load environment variables and access API keys from .env file:
 require __DIR__ . '/vendor/autoload.php';
 $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
@@ -57,8 +57,6 @@ $output['data'] = $decode;
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json; charset=UTF-8');
 
-// echo (json_encode($_REQUEST['bbox']))
 echo json_encode($output);
-// echo($data);
 
 ?>

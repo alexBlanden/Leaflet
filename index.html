@@ -112,6 +112,89 @@
             </div>
           </div>
 
+          <div class="modal fade modal-lg" tabindex="-1" id="holidaysModal">
+            <div class="modal-dialog">
+              <div class="modal-content">
+
+                <div class="modal-header" id="holidaysHeader">
+                  <h5 class="modal-title" id="holidaysTitle">Public Holidays</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                  <div class="align-items-center loading-screen" id="holidaysLoading">
+                    <strong>Loading</strong>
+                    <div class="spinner-border ms-auto" role="status" aria-hidden="true">
+                    </div>
+                  </div>
+                  <table class="table table-striped table-hover" id="holidaysTable">
+                    <thead>
+                      <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Local Name</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody id="holidaysBody">
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal fade modal-lg" tabindex="-1" id="worldBankModal">
+            <div class="modal-dialog">
+              <div class="modal-content">
+
+                <div class="modal-header" id="worldBankHeader">
+                  <h5 class="modal-title" id="worldBankTitle">Govt. Expenditure as a % of GDP</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                  <!-- <div class="align-items-center loading-screen" id="worldBankLoading">
+                    <strong>Loading</strong>
+                    <div class="spinner-border ms-auto" role="status" aria-hidden="true">
+                    </div>
+                  </div> -->
+                  <table class="table table-hover table-borderless" id="worldBankTable">
+                    <thead>
+                      <tr>
+                        <!-- <th scope="col">Description</th> -->
+                        <th scope="col"></th>
+                      </tr>
+                    </thead>
+                    <tbody id="worldBankBody">
+                      <tr>
+                        <td class="align-middle">Below is a selection of charts showing Government expenditure and categorised by The World Bank's <a href="https://datatopics.worldbank.org/world-development-indicators" target="_blank" class="link-primary">World Development Indicators</a>. Data shown is by most recent entry.</td>
+                      </tr>
+                      <tr>
+                        <td><canvas id="healthChart"></canvas></td>
+                      </tr>
+                      <tr>
+                        <td><canvas id="eduChart"></canvas></td>
+                      </tr>
+                      <tr>
+                        <td><canvas id="militaryChart"></canvas></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="modal fade bd-example-modal-xl" tabindex="-1" id="newsModal">
             <div class="modal-dialog modal-dialog-scrollable modal-xl">
               <div class="modal-content">
@@ -186,15 +269,14 @@
           </div>
           <!-- Map -->
           <div id="map" class="rounded">
+            <nav class="navbar fixed-top m-2" id="navContainer">
+              <span class="input-group mx-auto" id="selectContainer">
+                <select class="form-select" id="country_menu">
+                  <option selected>Pick a Country</option>
+              </select>
+            </span>
+            </nav>
           </div> 
-          <!-- Dropdown Country menu -->
-          <nav class="fixed-top m-3">
-            <div class="input-group mx-auto" id="selectContainer">
-              <select class="form-select" id="country_menu">
-                <option selected>Pick a Country</option>
-            </select>
-            </div>
-          </nav>
         <script src="Front/node_modules/leaflet-easybutton/src/easy-button.js"></script>
         <script src="Front/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
         <script src="Front/node_modules/chart.js/dist/chart.min.js"></script>

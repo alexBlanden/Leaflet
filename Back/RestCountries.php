@@ -24,10 +24,8 @@ $output['status']['name'] = 'restCountriesAPI';
 $output['status']['description'] = 'success';
 $output['data'] = $decode;
 
-header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Origin: https://alexblanden.co.uk');
 header('Content-Type: application/json; charset=UTF-8');
-
-// print_r($_REQUEST);
 
 echo json_encode($output);
 

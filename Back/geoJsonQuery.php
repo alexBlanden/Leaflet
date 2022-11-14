@@ -5,6 +5,8 @@ $decode = json_decode($countryBordersFileContent, true);
 
 $country_names_and_iso_codes = [];
 
+//Prepare array containing JSON for each country
+
 foreach($decode['features'] as $country_data){
     array_push(
         $country_names_and_iso_codes,
@@ -15,6 +17,9 @@ foreach($decode['features'] as $country_data){
         )
     );
 }
+
+//Menu select should be alphabetical:
+sort($country_names_and_iso_codes);
 
 $output['status']["code"] = "200";
 $output['status']["name"] = "ok";

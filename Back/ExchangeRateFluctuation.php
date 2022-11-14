@@ -1,13 +1,20 @@
 <?php
 
-$apikey = 'YpGK6DiLKwdsdUcQ7L6P2oKM4AID3UgE';
+require __DIR__ . '/vendor/autoload.php';
+$dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+$apikey = $_ENV['api_layer_key'];
+
+// Returns currency fluctuation amount for the last year for a specific currency vs the US Dollar
+
 $url = "https://api.apilayer.com/exchangerates_data/fluctuation?start_date=".$_REQUEST['startDate'].'&end_date='.$_REQUEST['endDate'].'&base=USD&symbols='.$_REQUEST['currencyCode'];
 
 // Open CURL session:
 $ch = curl_init();
 
 curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-    "Content-Tpye: texy/plain",
+    "Content-Tpye: text/plain",
     "apikey: $apikey"
 ));
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);

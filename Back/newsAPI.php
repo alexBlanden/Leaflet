@@ -51,7 +51,7 @@ $output['data'] = $new_array;
 
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json; charset=UTF-8');
-
+// https://alexblanden.co.uk
 
 echo json_encode($output);
 

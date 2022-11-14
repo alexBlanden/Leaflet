@@ -4,21 +4,25 @@
 html, body, .container, #map {
     height: 99%;
     width: 95vw;
+    align-items: center;
 }
+/* #map {
+    display: flex;
+    align-items: center;
+} */
 
-nav {
+/* nav {
     width: 95vw;
-}
+} */
 
 a {
     text-decoration: none;
 }
 
 
-.container {
+/* .container {
     position: absolute;
-    align-items: center;
-}
+} */
 
 .offcanvas {
     background-color: rgba(255, 255, 255, 0.1);
@@ -46,10 +50,6 @@ a {
     width: 200px;
 }
 
-/* #weatherModal .modal-body {
-    background-image: url('./assets/pexels-francesco-ungaro-281260.jpg');
-    background-size: 115%;
-} */
 
 #countryBody {
     position: relative;
@@ -97,4 +97,12 @@ a {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+nav {
+    height: 10px;
+}
+
+.link-primary {
+    padding:0%;
 }
