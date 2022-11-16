@@ -381,29 +381,43 @@ function getHolidays (iso) {
     $.when(contactHolidaysAPI).then(function(result){
         $('#holidaysTable').show();
         $('#holidaysLoading').hide();
+        const months = ['Jan', 'Feb', 'March', 'April', 'May', 'Jun', 'Jul', 'August', 'Sept', 'Oct', 'Nov', 'Dec']
        
         console.log(result);
-        $('#holidaysBody').html("");
+        const today = new Date()
+        $('#pastholidaysBody, #todayholidaysBody, #upcomingholidaysBody').html("");
         for(let i=0; i<result.data.length; i++){
-            if(result.data[i].counties){
-            $('#holidaysBody').append(
+            let counties = result.data[i].counties || 'National'
+            let holidayDate = new Date(result.data[i].date)
+            if(today > holidayDate){
+            $('#pastholidaysBody').append(
                 `<tr>
                 <th scope="row">${i+1}</th>
-                <td>${result.data[i].name} (${result.data[i].counties})</td>
+                <td>${result.data[i].name} (${counties})</td>
                 <td>${result.data[i].localName}</td>
                 <td>${result.data[i].types[0]}</td>
-                <td>${result.data[i].date}</td>
+                <td>${holidayDate.getDate()}-${months[holidayDate.getMonth()]}</td>
               </tr>`
-            )} else {
-                $('#holidaysBody').append(
+            )} else if (today == holidayDate) {
+                $('#todayholidaysBody').append(
                     `<tr>
                     <th scope="row">${i+1}</th>
-                    <td>${result.data[i].name}</td>
+                    <td>${result.data[i].name} (${counties})</td>
                     <td>${result.data[i].localName}</td>
                     <td>${result.data[i].types[0]}</td>
-                    <td>${result.data[i].date}</td>
+                    <td>${holidayDate.getDate()}-${months[holidayDate.getMonth()]}</td>
                   </tr>`
-            )}
+            )} else {
+                $('#upcomingholidaysBody').append(
+                    `<tr>
+                    <th scope="row">${i+1}</th>
+                    <td>${result.data[i].name} (${counties})</td>
+                    <td>${result.data[i].localName}</td>
+                    <td>${result.data[i].types[0]}</td>
+                    <td>${holidayDate.getDate()}-${months[holidayDate.getMonth()]}</td>
+                  </tr>`
+                )
+            }
         }
     })
 }
@@ -940,7 +954,6 @@ $(document).ready(function(){
                 // const countrySelect = countryVal.name;
 
                 drawCountryBorders(currentCountryIso);
-                getNews(currentCountryIso);
                 getHolidays(currentCountryIso);
                 
                 //Perform forward Geocoding using country name
@@ -958,6 +971,11 @@ $(document).ready(function(){
                     getWeather(countrySelectData.lat, countrySelectData.lng)
                     getFromRestCountries(currentCountryIso)
                     getNews(currentCountryIso);
+                    getHolidays(currentCountryIso);
+
+                    getHealthExpenditure(currentCountryIso);
+                    getEduExpenditure(currentCountryIso);
+                    getMilitaryExpenditure(currentCountryIso);
                     let initialBoundingBox = JSON.parse(JSON.stringify(mapBorder.getBounds()))
         
                     getPlacesOfInterest(initialBoundingBox)
