@@ -1,19 +1,12 @@
-* {
-    padding: 2%;
-}
-html, body, .container, #map {
-    height: 99%;
-    width: 95vw;
-    align-items: center;
-}
-/* #map {
-    display: flex;
-    align-items: center;
-} */
 
-/* nav {
-    width: 95vw;
-} */
+html, body, .container {
+    height: 100vh;
+    width: 100vw;
+    align-items: center;
+}
+#map {
+    height: 100%;
+}
 
 a {
     text-decoration: none;
@@ -23,20 +16,33 @@ tbody{
     margin-top: 1px;
 }
 
-/* .container {
-    position: absolute;
-} */
-
 .offcanvas {
     background-color: rgba(255, 255, 255, 0.1);
     color: aliceblue;
 }
 
-.cards-wrapper{
+#headline-card > .card > .card-body, #headline-card > .card > .card-footer {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
 }
 
+
+#headline-card > .card > .card-body{
+    align-items: baseline;
+}
+
+
+#hero-icon {
+    font-size: 2.25rem;
+}
+
+.weather-icon-small .card-footer{
+    font-size: 1.5rem;
+}
+
+#card-1, #card-2 {
+    display: flex;
+}
 .card {
     margin: 2px;
 }

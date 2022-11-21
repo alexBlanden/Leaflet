@@ -1,13 +1,7 @@
 <?php
 
-
 ini_set('display_errors', 'On');
 error_reporting(E_ALL);
-
-// // Require additional classes using Composer and use Dotenv to easily load environment variables and access API keys from .env file:
-require __DIR__ . '/vendor/autoload.php';
-$dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
-$dotenv->load();
 
 $rawData = file_get_contents('./country-capitals.json');
 $cityList = json_decode($rawData, true);
@@ -36,18 +30,7 @@ for($i=0; $i < $length; $i++){
     //     header('Content-Type: application/json; charset=UTF-8');
     }
 }
-
-$openWeather = $_ENV['open_weather_id'];
-
-
-// $url = 'https://api.openweathermap.org/data/2.5/forecast?lat='. $_REQUEST['latitude'].'&lon='.$_REQUEST['longitude'].'&units=metric&appid='.$openWeather;  
-
-$url = 'https://api.openweathermap.org/data/2.5/forecast?lat='. $cityLat.'&lon='.$cityLng.'&units=metric&appid='.$openWeather;
-
-
-
-//Curl Session:
-
+$url = 'https://api.open-meteo.com/v1/forecast?latitude='.$cityLat.'&longitude='.$cityLng.'&daily=weathercode,temperature_2m_max,sunrise,sunset,rain_sum&timezone=auto';
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);

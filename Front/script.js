@@ -282,14 +282,14 @@ const success = (position) => {
     loadLocation()
     loadEasyButtons();
 
-    getWeather(initialLocationData.lat,initialLocationData.lng);
+    // getWeather(initialLocationData.lat,initialLocationData.lng);
     getDataFromCoordinates(initialLocationData.lat,initialLocationData.lng);
 }
 
 //If not, default to Brussels.
 const fail = () => {
     loadMap();
-    getWeather(50.8476, 4.3572);
+    getWeather('BE');
     drawInitialCountryBorders('BE');
     loadEasyButtons();
     getNews('BE');
@@ -537,10 +537,12 @@ $.when(contactOpenCage).then(function(result){
     //saves iso and country name from returned data
     initialLocationData.isoA2 = result.data.results[0].components.country_code;
     initialLocationData.countryName = result.data.results[0].components.state;
+    $("#country_menu").val(initialLocationData.isoA2).change();
     //Populate
     $("#drives > h6").html(`Drive on the ${result.data.results[0].annotations.roadinfo.drive_on}`);
 
-    
+    getWeather(initialLocationData.isoA2);
+    getFiveDayForecast(initialLocationData.isoA2);
     getFromRestCountries(initialLocationData.isoA2);
     getNews(initialLocationData.isoA2);
     drawInitialCountryBorders(initialLocationData.isoA2);
@@ -676,104 +678,47 @@ function getPlacesOfInterest (bbox) {
 }
 
 //Uses coordinates to get weather info for lat/lng
-function getWeather(latitude, longitude) {
+function getWeather(iso) {
     $('#weatherInfo').hide()
     $('#weatherLoading').show()
     var contactOpenWeather = fetchAjax (
         'Back/OpenWeather.php',
         {
-            latitude,
-            longitude
+            // latitude,
+            // longitude
+            iso
         }
     );
     $.when(contactOpenWeather).then(function(result){
+        console.log(result);
         $('#carouselInfo').text("")
         $('#indicators').text("")
         //Clear arrays used for weatherChart:
         timeOfDay.length = 0;
         temperature.length = 0;
         bgroundColor.length = 0;
+        const daysOfTheWeek = ["Sun", "Mon", "Tues", "Weds", "Thurs", "Fri", "Sat"]
         
         //Iterate over result array and append bootstrap info cards to bootstrap carousel in weather modal. Cards added in pairs:
-        for(let i = 0; i<result.data.list.length; i+=2){
+        for(let i = 0; i<result.data.list.length; i++){
             let date = new Date(result.data.list[i].dt * 1000);
-            let date2 = new Date(result.data.list[i+1].dt * 1000);
-            timeOfDay.push(date.toLocaleTimeString("en-GB"), date2.toLocaleTimeString("en-GB"));
-            temperature.push(result.data.list[i].main.temp, result.data.list[i+1].main.temp)
-            
-            //Add bootstrap info cards to carousel. First card needs class of "Active" added:
-            if(i==0){
-                $('#carouselInfo').append(
-                    `<div class="carousel-item active">
-                        <div class="cards-wrapper">
-    
-                            <div class="card text-bg-light mb-3" style="width: 10rem;">
-                                <div class="card-body">
-                                    <h6 class="card-title">${date.toLocaleDateString("en-GB")}</h6>
-                                    <h6>${date.toLocaleTimeString("en-GB")}</h6>
-                                    <img src="http://openweathermap.org/img/w/${result.data.list[i].weather[0].icon}.png" alt="${result.data.list[i].weather[0].description}">
-                                    <ul class="card-text">
-                                        <li>${Math.floor(result.data.list[i].main.temp)}&#8451</li>
-                                        <li>${result.data.list[i].weather[0].main}</li>
-                                    </ul>
-                                </div>
-                            </div>
-                            
-                            
-                            <div class="card text-bg-light mb-3" style="width: 10rem;">
-                                <div class="card-body">
-                                    <h6 class="card-title">${date2.toLocaleDateString("en-GB")}</h6>
-                                    <h6>${date2.toLocaleTimeString("en-GB")}</h6>
-                                    <img src="http://openweathermap.org/img/w/${result.data.list[i+1].weather[0].icon}.png" alt="${result.data.list[i+1].weather[0].description}">
-                                    <ul class="card-text">
-                                        <li>${Math.floor(result.data.list[i+1].main.temp)}&#8451</li>
-                                        <li>${result.data.list[i+1].weather[0].main}</li>
-                                    </ul>
-                                </div>
-                            </div>
-                    
-                        </div>
-                    </div>`
-                    ); 
-                    $('#indicators').html(`<button type="button" data-bs-target="#carouselInfo" data-bs-slide-to="${i}" class="active" aria-current="true" aria-label="Slide ${i+1}"></button>
-                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="${i+1}" aria-label="Slide ${i+2}"></button>`)
-            } else {
-            $('#carouselInfo').append(
-                `<div class="carousel-item">
-                    <div class="cards-wrapper">
-
-                        <div class="card text-bg-light mb-3" style="width: 10rem;">
-                            <div class="card-body">
-                                <h6 class="card-title">${date.toLocaleDateString("en-GB")}</h6>
-                                <h6>${date.toLocaleTimeString("en-GB")}</h6>
-                                <img src="http://openweathermap.org/img/w/${result.data.list[i].weather[0].icon}.png" alt="${result.data.list[i].weather[0].description}">
-                                <ul class="card-text">
-                                    <li>${Math.floor(result.data.list[i].main.temp)}&#8451</li>
-                                    <li>${result.data.list[i].weather[0].main}</li>
-                                </ul>
-                            </div>
-                        </div>
-                        
-                        
-                        <div class="card text-bg-light mb-3" style="width: 10rem;">
-                            <div class="card-body">
-                                <h6 class="card-title">${date2.toLocaleDateString("en-GB")}</h6>
-                                <h6>${date2.toLocaleTimeString("en-GB")}</h6>
-                                <img src="http://openweathermap.org/img/w/${result.data.list[i+1].weather[0].icon}.png" alt="${result.data.list[i+1].weather[0].description}">
-                                <ul class="card-text">
-                                    <li>${Math.floor(result.data.list[i+1].main.temp)}&#8451</li>
-                                    <li>${result.data.list[i+1].weather[0].main}</li>
-                                </ul>
-                            </div>
-                        </div>
-                
-                    </div>
-                </div>`
-            )
-            
-            $('#indicators').append(`<button type="button" data-bs-target="#carouselInfo" data-bs-slide-to="${i}" aria-current="true" aria-label="Slide ${i+1}"></button>
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="${i+1}" aria-label="Slide ${i+2}"></button>`)
+            if(i == 0){
+                timeOfDay.push(`${daysOfTheWeek[date.getDay()]} ${date.getDate()}`)
+                temperature.push(result.data.list[i].main.temp)
+                i++
             }
+
+            if(date.toLocaleTimeString("en-GB") == '03:00:00'){
+                timeOfDay.push(`${daysOfTheWeek[date.getDay()]} ${date.getDate()}`);
+            } else{
+                timeOfDay.push(date.toLocaleTimeString("en-US", {
+                    hour: '2-digit', minute: '2-digit'
+                }));
+            }
+            
+            temperature.push(result.data.list[i].main.temp)
+            
+           
         }
         //Create color scheme for temperature chart
         for(let i=0; i<temperature.length; i++){
@@ -816,6 +761,70 @@ function getWeather(latitude, longitude) {
     
 }
 
+function getFiveDayForecast (iso) {
+    var contactOpenMeteo = fetchAjax(
+        'Back/FiveDayForecast.php',
+        {
+            iso
+        }
+    );
+    $.when(contactOpenMeteo).then(function (result){
+        console.log(result)
+        //Populate weather info, first item is separate from smaller info cards
+        let headlineDate = new Date(result.data.daily.time[0]);
+        let month = headlineDate.toLocaleString('default', { month: 'short' });
+        const units = result.data.daily_units.temperature_2m_max;
+        let sunrise = new Date(result.data.daily.sunrise[0])
+        let sunset = new Date(result.data.daily.sunset[0])
+        $('#headline-card').html(
+            `<div class="card">
+            <div class="card-body">
+              <h5 class="card-title">${headlineDate.getDate()} ${month}</h5>
+              <h5 class="card-text">${result.data.daily.temperature_2m_max[0]}${units}</h5>
+              <i id="hero-icon" class="wi wi-wmo4680-${result.data.daily.weathercode[0]}"></i> 
+            </div>
+            <div class="card-footer">
+                <span><i class="wi wi-sunrise weather-icon-small"></i> ${sunrise.toLocaleTimeString("en-US", {
+                    hour: '2-digit', minute: '2-digit'
+                })}</span>
+                <span>Rain: ${result.data.daily.rain_sum[0]}mm</span>
+                <span><i class="wi wi-sunset weather-icon-small"></i> ${sunset.toLocaleTimeString("en-US", {
+                    hour: '2-digit', minute: '2-digit'
+                })}</span>
+            </div>
+          </div>`
+        )
+
+        for(let i=1; i<result.data.daily.time.length/2; i++){
+            let date = new Date(result.data.daily.time[i])
+            let month = date.toLocaleString('default', { month: 'short' });
+            let date2 = new Date(result.data.daily.time[i+3])
+            let month2 = date2.toLocaleString('default', { month: 'short' });
+            console.log(date);
+            $('#card-1').append(
+                `<div class="card" style="width: 18rem;">
+                <div class="card-body">
+                  <h5 class="card-title">${date.getDate()} ${month}</h5>
+                  <p class="card-text">${result.data.daily.temperature_2m_max[i]}${units}</p>
+                  <i class="wi wi-wmo4680-${result.data.daily.weathercode[i]} weather-icon-small"></i>
+                </div>
+              </div>`
+            )
+            $('#card-2').append(
+                `<div class="card" style="width: 18rem;">
+                <div class="card-body">
+                <h5 class="card-title">${date2.getDate()} ${month2}</h5>
+                <p class="card-text">${result.data.daily.temperature_2m_max[i+3]}${units}</p>
+                <i class="wi wi-wmo4680-${result.data.daily.weathercode[i+3]} weather-icon-small"></i>
+                </div>
+              </div>`
+            )
+        }
+    }, function (err){
+        console.log(err)
+    })
+}
+
 //Use iso code to fetch data from RestCountries API, uses currency code to get data from currency api:
 function getFromRestCountries(iso) {
     $('#factsloading').show()
@@ -848,11 +857,10 @@ function getFromRestCountries(iso) {
 
         getCurrencyInfo(currencyCode)
         getCurrencyFluctuation(currencyCode)
-        setTimeout(()=> {
-            $('#countryBody').show(1000);
-            $('#factsloading').hide(1000);
+        
+        $('#countryBody').show(1000);
+        $('#factsloading').hide(1000);
     
-        }, 2000)
     }, function(error){
         console.log(error.responseText)
     })
@@ -916,7 +924,8 @@ function getCurrencyFluctuation(currencyCode){
     let startDate = `${lastYear}-${month}-${day}`
     let endDate = `${year}-${month}-${day}`
 
-    var contactExchangeApi = fetchAjax('Back/ExchangeRateFluctuation.php',
+    var contactExchangeApi = fetchAjax(
+        'Back/ExchangeRateFluctuation.php',
     {
         currencyCode,
         startDate,
@@ -924,6 +933,7 @@ function getCurrencyFluctuation(currencyCode){
     }
     );
     $.when(contactExchangeApi).then(function (result){
+        console.log(result)
         $('#conversion').html(`Since ${day} of ${monthsOfTheYear[today.getMonth()]} last year the ${currencyCode} has fluctuated in value against the US Dollar by ${Math.abs(result.data.rates[currencyCode].change_pct)}%`)
     }, function (err) {
         console.log(err.responseText);
@@ -942,15 +952,15 @@ $(document).ready(function(){
             console.log(result)
             for(let i= 0; i < result.data.length; i++){
                 $('#country_menu').append(
-                    `<option class="country_menu_select" value='{"iso":"${result.data[i].iso_a2}", "name":"${result.data[i].name}"}'>${result.data[i].name}</option>`)   
+                    `<option class="country_menu_select" value="${result.data[i].iso_a2}">${result.data[i].name}</option>`)   
             }
             $("#country_menu").change(function(){
                 //Value made up of iso code and name of country
-                var countryVal = JSON.parse($('#country_menu').val())
-                countrySelectData.countryIso = countryVal.iso
+                var countryVal = $('#country_menu').val()
+                countrySelectData.countryIso = countryVal;
                 const currentCountryIso = countrySelectData.countryIso;
-                const currentCountryName = encodeURI(countryVal.name);
-                countrySelectData.countryName = countryVal.name;
+                const currentCountryName = encodeURI($("#country_menu option:selected").text());
+                // countrySelectData.countryName = countryVal.name;
                 // const countrySelect = countryVal.name;
 
                 drawCountryBorders(currentCountryIso);
@@ -968,7 +978,7 @@ $(document).ready(function(){
                     countrySelectData.lng = result.data.results[0].geometry.lng;
 
                     //Populate Weather Info
-                    getWeather(countrySelectData.lat, countrySelectData.lng)
+                    getWeather(currentCountryIso);
                     getFromRestCountries(currentCountryIso)
                     getNews(currentCountryIso);
                     getHolidays(currentCountryIso);
