@@ -9,7 +9,6 @@ import {
     getFiveDayForecast,
     getFromRestCountries,
     getCurrencyInfo,
-    getCurrencyFluctuation,
     getDataFromCoordinates
 } from './getData.js';
 
@@ -28,13 +27,27 @@ $('#map, #country_menu').hide();
 $('#mapLoadingContainer').show();
 
 //Create Leaflet map
-var map = L.map("map").fitWorld();
+var map = L.map("map");
 var mapStyle = {
     "fillColor": "#999595",
     "weight": 3,
     "opacity": 0.7,
     "color": "black",
     "dashArray": "20,10,5,5,5,10"
+}
+loadMap();
+
+navigator.geolocation.getCurrentPosition(success, fail);
+
+function success (position) {
+    const lat =  position.coords.latitude;
+    const lng = position.coords.longitude;
+
+    getDataFromCoordinates(lat, lng);
+}
+
+function fail () {
+    $("#country_menu").val('AF').change();
 }
 
 var languages;
@@ -58,6 +71,14 @@ var countrySelectData = {
 
 var mapBorder = null;
 let markers = L.markerClusterGroup();
+let videos = L.markerClusterGroup();
+
+var overlays = {
+    'Places': markers,
+    'Video Stations': videos,
+}
+
+var layerControl = L.control.layers(null, overlays).addTo(map);
 //Create Bootstrap 5 modals for country info
 var countryModal = new bootstrap.Modal($('#countryModal'));
 var weatherModal = new bootstrap.Modal($('#weatherModal'));
@@ -145,12 +166,12 @@ const healthChart = new Chart(ctxHealth, {
                 display: true,
                 title: {
                     display: true,
-                    text: "%",
+                    text: "% of GDP",
                     font: {
                         weight: 'bold'
                     },
                 },
-                beginAtZero: true,
+                beginAtZero: false,
             }
         }
     }
@@ -205,7 +226,7 @@ const eduChart = new Chart(ctxEdu, {
                         weight: 'bold'
                     },
                 },
-                beginAtZero: true,
+                beginAtZero: false,
             }
         }
     }
@@ -255,12 +276,12 @@ const militaryChart = new Chart(ctxMil, {
                 display: true,
                 title: {
                     display: true,
-                    text: "%",
+                    text: "% of GDP",
                     font: {
                         weight: 'bold'
                     },
                 },
-                beginAtZero: true,
+                beginAtZero: false,
             }
         }
     }
@@ -286,17 +307,15 @@ function populateSelectMenu () {
 
 function loadMap () {
     console.log('loading map')
-    $('#mapLoadingContainer')
     L.tileLayer('https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=gce3UfFmnaOupUCQzm4b',
     {
-    maxZoom: 19,
     attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
     style: 'https://api.maptiler.com/maps/basic-v2/style.json?key=gce3UfFmnaOupUCQzm4b'
     }).addTo(map);
 }
 
 function drawCountryBorders (iso) {
-    console.log(`start`)
+    console.log(`start with ISO: ${iso}`)
     var countryBorders = fetchAjax(
         `Back/geoJsonCoordinates.php`,
         {iso}
@@ -312,8 +331,8 @@ function drawCountryBorders (iso) {
         }).addTo(map)
         //Center map view on newly selected country
         boundingBox = mapBorder.getBounds();
-        console.log(boundingBox);
-        map.flyToBounds(boundingBox)
+        // console.log(boundingBox);
+        map.fitBounds(mapBorder.getBounds())
 
         let initialBoundingBox = JSON.parse(JSON.stringify(mapBorder.getBounds()))
         getPlacesOfInterest(initialBoundingBox);
@@ -351,23 +370,11 @@ function loadEasyButtons () {
 
 }
 
-navigator.geolocation.getCurrentPosition(success, fail);
-
-function success (position) {
-    const lat =  position.coords.latitude;
-    const lng = position.coords.longitude;
-
-    getDataFromCoordinates(lat, lng)
-}
-
-function fail () {
-    
-}
 
 $(document).ready(function (){
     populateSelectMenu();
-    loadMap();
     loadEasyButtons();
+
     $('#map, #country_menu').show();
     $('#mapLoadingContainer').hide();
 })
@@ -385,7 +392,7 @@ $('#country_menu').change(function () {
     getFiveDayForecast(countryIso)
     getFromRestCountries(countryIso)
     getCurrencyInfo(countryIso)
-    getCurrencyFluctuation(countryIso)    
+    // getCurrencyFluctuation(countryIso)    
 
 })
 

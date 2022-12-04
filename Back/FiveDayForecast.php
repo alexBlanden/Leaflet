@@ -30,7 +30,7 @@ for($i=0; $i < $length; $i++){
     //     header('Content-Type: application/json; charset=UTF-8');
     }
 }
-$url = 'https://api.open-meteo.com/v1/forecast?latitude='.$cityLat.'&longitude='.$cityLng.'&daily=weathercode,temperature_2m_max,sunrise,sunset,rain_sum&timezone=auto';
+$url = 'https://api.open-meteo.com/v1/forecast?latitude='.$cityLat.'&longitude='.$cityLng.'&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,rain_sum&timezone=auto';
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);

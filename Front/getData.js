@@ -21,10 +21,10 @@ import {
     map
 } from './script.js';
 
+
 import {
     convertPopulationToString
 } from './utils.js';
-
 
 var fetchAjax = function (address, query) {
     return $.ajax({
@@ -44,9 +44,13 @@ function getDataFromCoordinates(lat,lng) {
     }
 );
 $.when(contactOpenCage).then(function(result){
+    console.log(result)
     //saves iso and country name from returned data
-    const isoA2 = result.data.results[0].components.country_code;
-    $("#country_menu").val(initialLocationData.isoA2).change();
+    let isoA2 = result.data.results[0].components.country_code.toUpperCase();
+
+    $("#country_menu").val(isoA2).change();
+    $('#map, #country_menu').show();
+    $('#mapLoadingContainer').hide();
 }, function(err){
     console.error(`Error:${err.responseText}`)
 });
@@ -67,46 +71,47 @@ function getHolidays (iso) {
         }
     );
     $.when(contactHolidaysAPI).then(function(result){
+        console.log(result)
         $('#holidaysTable').show();
         $('#holidaysLoading').hide();
-        const months = ['Jan', 'Feb', 'March', 'April', 'May', 'Jun', 'Jul', 'August', 'Sept', 'Oct', 'Nov', 'Dec']
-       
-        console.log(result);
-        const today = new Date()
         $('#pastholidaysBody, #todayholidaysBody, #upcomingholidaysBody').html("");
+        if(result.data == null){
+            $('#pastholidaysBody').html(
+                `<tr>
+                    <td>
+                    <td><p class="text-center">Sorry Holidays API Unavaiable in some locations</p></td>
+                    <td>
+                </tr>`
+            )
+        } else {
+        const today = new Date()
         for(let i=0; i<result.data.length; i++){
             let counties = result.data[i].counties || 'National'
             let holidayDate = new Date(result.data[i].date)
             if(today > holidayDate){
             $('#pastholidaysBody').append(
                 `<tr>
-                <th scope="row">${i+1}</th>
-                <td>${result.data[i].name} (${counties})</td>
-                <td>${result.data[i].localName}</td>
-                <td>${result.data[i].types[0]}</td>
-                <td>${holidayDate.getDate()}-${months[holidayDate.getMonth()]}</td>
+                    <td><p class="text-start text-muted">${result.data[i].name}<br>(${result.data[i].localName})</p></td>
+                    <td><p class="text-start text-muted">${counties}</p></td>
+                    <td><p class="text-end text-muted">${Date.parse(holidayDate).toString('d MMM')}</p></td>
               </tr>`
             )} else if (today == holidayDate) {
                 $('#todayholidaysBody').append(
                     `<tr>
-                    <th scope="row">${i+1}</th>
-                    <td>${result.data[i].name} (${counties})</td>
-                    <td>${result.data[i].localName}</td>
-                    <td>${result.data[i].types[0]}</td>
-                    <td>${holidayDate.getDate()}-${months[holidayDate.getMonth()]}</td>
+                    <td><p class="text-start">${result.data[i].name}<br>(${result.data[i].localName})</p></td>
+                    <td><p class="text-start">${counties}</p></td>
+                    <td><p class="text-end">${Date.parse(holidayDate).toString('d MMM')}</p></td>
                   </tr>`
             )} else {
                 $('#upcomingholidaysBody').append(
                     `<tr>
-                    <th scope="row">${i+1}</th>
-                    <td>${result.data[i].name} (${counties})</td>
-                    <td>${result.data[i].localName}</td>
-                    <td>${result.data[i].types[0]}</td>
-                    <td>${holidayDate.getDate()}-${months[holidayDate.getMonth()]}</td>
+                    <td><p class="text-start">${result.data[i].name}<br>(${result.data[i].localName})</p></td>
+                    <td><p class="text-start">${counties}</p></td>
+                    <td><p class="text-end">${Date.parse(holidayDate).toString('d MMM')}</p></td>
                   </tr>`
                 )
             }
-        }
+        }}
     }, function (err){
         console.log(err.responseText);
     })
@@ -122,6 +127,7 @@ function getNews(iso){
         }
     );
     $.when(contactNewsAPI).then(function (result){
+        console.log(result)
         //Clear previous entries
         $('#newsBody').html("")
         //Service not available in all countries
@@ -132,9 +138,7 @@ function getNews(iso){
         for(let i= 0; i<result.data.articles.length; i++){
         $('#newsBody').append(
             `<tr>
-            <th scope="row">${i+1}</th>
-            <td>${result.data.articles[i].title}</td>
-            <td><a href="${result.data.articles[i].url}" target="_BLANK">${result.data.articles[i].source.name}</a></td>
+            <td><a href="${result.data.articles[i].url}" target="_BLANK">${result.data.articles[i].title}</a></td>
           </tr>`
         )}
 
@@ -239,6 +243,7 @@ function getPlacesOfInterest(bbox){
         
         //For loop pushes geojson objects to resultAsJson array
         for(let i= 0; i < result.data.geonames.length; i++){
+            let summary = result.data.geonames[i].summary.replace("(...)", "")
             resultAsJson.features.push(
                 {
                     type: "Feature",
@@ -248,7 +253,7 @@ function getPlacesOfInterest(bbox){
                     },
                     properties: {
                         name: result.data.geonames[i].title,
-                        summary: result.data.geonames[i].summary,
+                        summary: summary,
                         thumbnail: result.data.geonames[i].thumbnailImg,
                         link: result.data.geonames[i].wikipediaUrl
                     }
@@ -271,8 +276,9 @@ function getPlacesOfInterest(bbox){
                 onEachFeature: function (feature, layer) {
                     const content =
                     `
-                    <h6 class="text-center"><a href="https://${feature.properties.link}" class="link-primary" target="_blank">${feature.properties.name}</h6></a>
+                    <h6 class="text-center fw-bold">${feature.properties.name}</h6>
                     <p>${feature.properties.summary}</p>
+                    <a href="https://${feature.properties.link}" class="link-primary" target="_blank">Read More</a>
                     `
                     layer.bindPopup(content)
                 },
@@ -303,8 +309,8 @@ function getWeather(iso) {
     );
     $.when(contactOpenWeather).then(function (result){
         console.log(result);
-        $('#carouselInfo').text("")
-        $('#indicators').text("")
+        // $('#carouselInfo').text("")
+        // $('#indicators').text("")
         
         //Clear arrays used for weatherChart:
         timeOfDay.length = 0;
@@ -382,18 +388,26 @@ function getFiveDayForecast (iso) {
         }
     );
     $.when(contactOpenMeteo).then(function (result){
+        $("#card-1").empty();
+        $("#card-2").empty();
         console.log(result)
         //Populate weather info, first item is separate from smaller info cards
         let headlineDate = new Date(result.data.daily.time[0]);
-        let month = headlineDate.toLocaleString('default', { month: 'short' });
         const units = result.data.daily_units.temperature_2m_max;
         let sunrise = new Date(result.data.daily.sunrise[0])
         let sunset = new Date(result.data.daily.sunset[0])
+        //CSS for headline color is temp dependent
+        let colour = "white, ";
+        let midRange = (result.data.daily.temperature_2m_max[0] + result.data.daily.temperature_2m_min[0])/2
+        // const headlineColorCss = `linear-gradient(to bottom right, white, ${colour})`;
         $('#headline-card').html(
             `<div class="card">
-            <div class="card-body">
-              <h5 class="card-title">${headlineDate.getDate()} ${month}</h5>
-              <h5 class="card-text">${result.data.daily.temperature_2m_max[0]}${units}</h5>
+            <div class="card-body" id="headline-body">
+              <h5 class="card-title">${Date.parse(headlineDate).toString("ddd dS MMM")}</h5>
+              <span>
+              <h5 class="card-text">${Math.round(result.data.daily.temperature_2m_max[0])}${units}</h5>
+              <p>${Math.round(result.data.daily.temperature_2m_min[0])}</p>
+              </span>
               <i id="hero-icon" class="wi wi-wmo4680-${result.data.daily.weathercode[0]}"></i> 
             </div>
             <div class="card-footer">
@@ -401,24 +415,60 @@ function getFiveDayForecast (iso) {
                     hour: '2-digit', minute: '2-digit'
                 })}</span>
                 <span>Rain: ${result.data.daily.rain_sum[0]}mm</span>
-                <span><i class="wi wi-sunset weather-icon-small"></i> ${sunset.toLocaleTimeString("en-US", {
+                <span><i class="wi wi-sunset weather-icon-footer"></i> ${sunset.toLocaleTimeString("en-US", {
                     hour: '2-digit', minute: '2-digit'
                 })}</span>
             </div>
           </div>`
         )
 
+
+        if(midRange> 38){
+            //red
+            colour += "red"
+        }else if(midRange> 30){
+            //orange
+            colour += "orange"                
+        }else if(midRange> 25){
+            //orange-yellow
+            colour += 'rgba(255, 181, 0, 1)'
+        }else if(midRange> 18){
+            //yellow
+            colour += 'rgba(255, 255, 0, 1)'
+        } else if (midRange>15){
+            //yellow-green
+            colour += 'rgba(171, 255, 0, 1)'
+        } else if (midRange>10){
+            //green
+            colour += 'rgba(0, 255, 124, 1)'
+        } else if (midRange>5){
+            //green-blue
+            colour +='rgba(0, 255, 192, 1)'    
+        } else if (midRange>0) {
+            //deep blue
+            colour += 'rgba(0, 75, 255, 1)'   
+        } else if(midRange < 0){
+            //white
+            colour += 'blue, white';
+        }
+        $('#headline-body').css('background-image', `linear-gradient(to bottom right, white, ${colour})`);
+
         for(let i=1; i<result.data.daily.time.length/2; i++){
             let date = new Date(result.data.daily.time[i])
-            let month = date.toLocaleString('default', { month: 'short' });
             let date2 = new Date(result.data.daily.time[i+3])
-            let month2 = date2.toLocaleString('default', { month: 'short' });
             console.log(date);
             $('#card-1').append(
                 `<div class="card" style="width: 18rem;">
                 <div class="card-body">
-                  <h5 class="card-title">${date.getDate()} ${month}</h5>
-                  <p class="card-text">${result.data.daily.temperature_2m_max[i]}${units}</p>
+                <div class="weather-text-container">
+                  <h5 class="card-title">${Date.parse(date).toString("ddd dS")}</h5>
+                  <span class="min-max-weather">
+                  <p class="card-text"><strong>${Math.round(result.data.daily.temperature_2m_max[i])}${units}</strong></p>
+                  <p class="card-text-min-temp">
+                  ${Math.round(result.data.daily.temperature_2m_min[i])}${units}
+                  </p>
+                  </span>
+                </div>
                   <i class="wi wi-wmo4680-${result.data.daily.weathercode[i]} weather-icon-small"></i>
                 </div>
               </div>`
@@ -426,8 +476,15 @@ function getFiveDayForecast (iso) {
             $('#card-2').append(
                 `<div class="card" style="width: 18rem;">
                 <div class="card-body">
-                <h5 class="card-title">${date2.getDate()} ${month2}</h5>
-                <p class="card-text">${result.data.daily.temperature_2m_max[i+3]}${units}</p>
+                <div class="weather-text-container">
+                <h5 class="card-title">${Date.parse(date2).toString("ddd dS")}</h5>
+                <span class="min-max-weather">
+                <p class="card-text"><strong>${Math.round(result.data.daily.temperature_2m_max[i+3])}${units}</strong></p>
+                <p class="card-text-min-temp">
+                  ${Math.round(result.data.daily.temperature_2m_min[i+3])}${units}
+                  </p>
+                  </span>
+                </div>
                 <i class="wi wi-wmo4680-${result.data.daily.weathercode[i+3]} weather-icon-small"></i>
                 </div>
               </div>`
@@ -458,9 +515,9 @@ function getFromRestCountries(iso) {
             src:`https://flagcdn.com/w320/${iso.toLowerCase()}.png`,
             height: '45px'
         })
-        $("#country").html(`${result.data[0].name.common}`)
-        $("#population > h6").html(`Population: ${convertPopulationToString(result.data[0].population)}`)
-        $("#capitalcity > h6").html(`Capital City: ${result.data[0].capital}`)
+        $("#country").html(`<h5>${result.data[0].name.common}</h5>`)
+        $("#population").html(`<h6>${convertPopulationToString(result.data[0].population)}</h6>`)
+        $("#capitalcity").html(`<h6>${result.data[0].capital}</h6>`)
         currencyCode = Object.keys(result.data[0].currencies)[0];
         currencySymbol = result.data[0].currencies[currencyCode].symbol
         currencyName = result.data[0].currencies[currencyCode].name
@@ -470,11 +527,10 @@ function getFromRestCountries(iso) {
         } else {
             languages = result.data[0].languages[languageKey]
         }
-        $("#language > h6").html(`Language: ${languages}`)
-        $('#region > h6').html(`Region: ${result.data[0].region}`)
+        $("#language").html(`<h6>${languages}</h6>`)
+        $('#region').html(`<h6>${result.data[0].region}</h6>`)
 
         getCurrencyInfo(currencyCode, currencyName, currencySymbol)
-        getCurrencyFluctuation(currencyCode)
         
         $('#countryBody').show(1000);
         $('#factsloading').hide(1000);
@@ -496,49 +552,20 @@ function getCurrencyInfo(currencyCode, currencyName, currencySymbol){
     $.when(contactOpenExchange).then(function(result){
         console.log(result)
         const currencyValue = result.data.rates
+        const num = parseFloat(Object.values(currencyValue)).toFixed(2);
         $("#currencyname").html(`<h4>Currency: ${currencyName}(${currencySymbol})</h4>`)
-        $("#vsthedollar").html(`<h5>1 US Dollar is worth: ${currencySymbol}${Object.values(currencyValue)}</h5>`)
+        $("#vsthedollar").html(`<h5>1 US Dollar is worth: ${currencySymbol}${num}</h5>`)
+        $('#calc > div > label').html(`$ to ${currencySymbol} converter`)
 
+        $('#calc-button').on('click',()=> {
+            let number = $('#amount').val()
+            $('#conversion').html(`<p class="fs-5 text">$${number} is worth ${currencySymbol}${number * num}</p>`)
+            $('#conversion').show();
+        })
         $('#currencyLoading').hide(1000);
         $('#currencyContainer').show(1000);
     }, function (error){
         console.log(error.responseText)
-    })
-
-}
-
-function getCurrencyFluctuation(currencyCode){
-    //Create date to show currency fluctuation over the past year:
-    const monthsOfTheYear = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-    let today = new Date()
-    let day = today.getDate()
-    let month = today.getMonth()
-    //Set date format for API
-    if(day.toString().length == 1){
-        day = `0${day}`
-    }
-    if(month.toString().length == 1){
-        month = `0${month}`
-    }
-    let year = today.getFullYear()
-    let lastYear = year-1
-
-    let startDate = `${lastYear}-${month}-${day}`
-    let endDate = `${year}-${month}-${day}`
-
-    var contactExchangeApi = fetchAjax(
-        'Back/ExchangeRateFluctuation.php',
-    {
-        currencyCode,
-        startDate,
-        endDate
-    }
-    );
-    $.when(contactExchangeApi).then(function (result){
-        console.log(result)
-        $('#conversion').html(`Since ${day} of ${monthsOfTheYear[today.getMonth()]} last year the ${currencyCode} has fluctuated in value against the US Dollar by ${Math.abs(result.data.rates[currencyCode].change_pct)}%`)
-    }, function (err) {
-        console.log(err.responseText);
     })
 
 }
@@ -554,6 +581,5 @@ export {
   getFiveDayForecast,
   getFromRestCountries,
   getCurrencyInfo,
-  getCurrencyFluctuation,
   getDataFromCoordinates
 }

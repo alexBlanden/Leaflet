@@ -31,13 +31,28 @@ tbody{
     align-items: baseline;
 }
 
+.card-body {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
 
 #hero-icon {
     font-size: 2.25rem;
 }
 
-.weather-icon-small .card-footer{
+.weather-icon-small{
+    font-size: 1.75rem;
+}
+
+.weather-icon-footer{
     font-size: 1.5rem;
+}
+
+.min-max-weather{
+    margin-top: 1px;
+    margin-bottom: 1px;
 }
 
 #card-1, #card-2 {
@@ -45,6 +60,13 @@ tbody{
 }
 .card {
     margin: 2px;
+}
+.card-text{
+    margin: auto;
+}
+
+.card-text-min-temp{
+    font-size: .8rem;
 }
 
 .loading-screen {
@@ -114,4 +136,9 @@ nav {
 
 .link-primary {
     padding:0%;
+}
+
+#holidaysLegend {
+    display: flex;
+    justify-content: space-around;
 }
