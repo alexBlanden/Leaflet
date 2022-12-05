@@ -18,6 +18,7 @@ import {
     //Leaflet Variables
     mapBorder,
     markers,
+    videos,
     map
 } from './script.js';
 
@@ -293,6 +294,90 @@ function getPlacesOfInterest(bbox){
 
     }, function(err){
         alert(`Error! ${err.responseText}`);
+    })
+}
+
+function getCameras(iso){
+    var cameraLocations = fetchAjax(
+        `Back/windyCams.php`,
+        {
+            iso
+        }
+    );
+    $.when(cameraLocations).then(function(result){
+        console.log(result)
+        var camsAsJson = {
+            type: "FeatureCollection",
+            features: [
+
+            ]
+        }
+
+        camsAsJson.features.length = 0;
+
+        for(let i= 0; i < result.data.result.webcams.length; i++){
+            camsAsJson.features.push(
+                {
+                    type: "Feature",
+                    geometry: {
+                        type: "Point",
+                        coordinates: [result.data.result.webcams[i].location.longitude, result.data.result.webcams[i].location.latitude]
+                    },
+                    properties: {
+                        id: result.data.result.webcams[i].id,
+                        name: result.data.result.webcams[i].title,
+                        lifetimeCam: result.data.result.webcams[i].player.lifetime.embed,
+                        monthCam: result.data.result.webcams[i].player.month.embed,
+                        yearCam: result.data.result.webcams[i].player.year.embed
+                    }
+                },
+            )
+        }
+        videos.clearLayers();
+
+        const geojsonMarkerOptions = {
+            radius: 8,
+            fillColor: "#6d7280",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        };
+        //Take each feature in resultAsJson, add html and bind popup
+        let featureData = L.geoJSON(camsAsJson, {
+                onEachFeature: function (feature, layer) {
+                    const selectMenu = `<select id="${feature.properties.id}" class="form-select" aria-label="Default select example">
+                    <option selected>Videos</option>
+                    <option value="${feature.properties.lifetimeCam}">Day</option>
+                    <option value="${feature.properties.yearCam}">Month</option>
+                    <option value="${feature.properties.monthCam}">Year</option>
+                    </select>`
+                    const content = 
+                    `
+                    <div class="container-fluid">
+                        <h6 class="text-center fw-bold">${feature.properties.name}</h6>
+                        ${selectMenu}
+                        <iframe src="" frameborder="0" id="video-${feature.properties.id}"></iframe>
+                        </div>
+                    </div>
+                        `
+                    layer.bindPopup(content)
+                    $(`"#${feature.properties.id}"`).on('change', function () {
+                        $(`"#video-${feature.properties.id}"`).attr('src', $(`"#${feature.properties.id}"`).val());
+                    })
+                },
+                pointToLayer: function (feature, latlng) {
+                    return L.circleMarker(latlng, geojsonMarkerOptions);
+                },
+            });
+            
+        videos.addLayer(featureData);
+
+        map.addLayer(videos);
+
+
+    }, function (err){
+        console.log(err.responseText)
     })
 }
 
@@ -577,6 +662,7 @@ export {
   getEduExpenditure,
   getMilitaryExpenditure,
   getPlacesOfInterest,
+  getCameras,
   getWeather,
   getFiveDayForecast,
   getFromRestCountries,

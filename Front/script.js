@@ -5,6 +5,7 @@ import {
     getEduExpenditure,
     getMilitaryExpenditure,
     getPlacesOfInterest,
+    getCameras,
     getWeather,
     getFiveDayForecast,
     getFromRestCountries,
@@ -306,7 +307,6 @@ function populateSelectMenu () {
 }
 
 function loadMap () {
-    console.log('loading map')
     L.tileLayer('https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=gce3UfFmnaOupUCQzm4b',
     {
     attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
@@ -382,18 +382,17 @@ $('#country_menu').change(function () {
     let countryIso = $('#country_menu').val();
     let countryName = encodeURI($("#country_menu option:selected").text());
 
+    getCameras(countryIso);
     drawCountryBorders(countryIso);
-    getHolidays(countryIso)
-    getNews(countryIso)
-    getHealthExpenditure(countryIso)
-    getEduExpenditure(countryIso)
-    getMilitaryExpenditure(countryIso)
-    getWeather(countryIso)
-    getFiveDayForecast(countryIso)
-    getFromRestCountries(countryIso)
-    getCurrencyInfo(countryIso)
-    // getCurrencyFluctuation(countryIso)    
-
+    getHolidays(countryIso);
+    getNews(countryIso);
+    getHealthExpenditure(countryIso);
+    getEduExpenditure(countryIso);
+    getMilitaryExpenditure(countryIso);
+    getWeather(countryIso);
+    getFiveDayForecast(countryIso);
+    getFromRestCountries(countryIso);
+    getCurrencyInfo(countryIso);  
 })
 
 
@@ -418,5 +417,6 @@ export {
     //Leaflet variables
     mapBorder,
     markers,
-    map
+    map,
+    videos
 }
