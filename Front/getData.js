@@ -272,6 +272,17 @@ function getPlacesOfInterest(bbox){
             opacity: 1,
             fillOpacity: 0.8
         };
+
+        const infoMarker = L.ExtraMarkers.icon({
+            // icon: 'fa-brands fa-wikipedia-w', <---Won't work :-/
+            icon: 'fa-info-circle',
+            iconColor: 'black',
+            markerColor: 'white',
+            shape: 'circle',
+            prefix: 'fa',
+            extraClasses: 'fa-lg'
+          });
+
         //Take each feature in resultAsJson, add html and bind popup
         let featureData = L.geoJSON(resultAsJson, {
                 onEachFeature: function (feature, layer) {
@@ -284,7 +295,7 @@ function getPlacesOfInterest(bbox){
                     layer.bindPopup(content)
                 },
                 pointToLayer: function (feature, latlng) {
-                    return L.circleMarker(latlng, geojsonMarkerOptions);
+                    return L.marker(latlng, {icon: infoMarker});
                 },
             });
             
@@ -343,6 +354,13 @@ function getCameras(iso){
             opacity: 1,
             fillOpacity: 0.8
         };
+
+        const camsMarker = L.ExtraMarkers.icon({
+            icon: 'fa-camera',
+            markerColor: 'black',
+            shape: 'star',
+            prefix: 'fa'
+          });
         //Take each feature in resultAsJson, add html and bind popup
         let featureData = L.geoJSON(camsAsJson, {
                 onEachFeature: function (feature, layer) {
@@ -361,13 +379,15 @@ function getCameras(iso){
                         </div>
                     </div>
                         `
+
+                    const selectMenuId = $('#'+feature.properties.id)
                     layer.bindPopup(content)
-                    $(`"#${feature.properties.id}"`).on('change', function () {
-                        $(`"#video-${feature.properties.id}"`).attr('src', $(`"#${feature.properties.id}"`).val());
+                    $(selectMenuId).on('change', function () {
+                        $("#video-"+feature.properties.id).attr('src', $("#"+feature.properties.id).val());
                     })
                 },
                 pointToLayer: function (feature, latlng) {
-                    return L.circleMarker(latlng, geojsonMarkerOptions);
+                    return L.marker(latlng, {icon: camsMarker});
                 },
             });
             
