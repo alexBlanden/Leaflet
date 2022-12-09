@@ -51,28 +51,14 @@ function fail () {
     $("#country_menu").val('AF').change();
 }
 
-var languages;
+
 var boundingBox = {};
 
-var countrySelectData = {
-    lat:"",
-    lng:"",
-    countryName:"",
-    countryIso:"",
-    flag: "",
-    weather: {
-        description: null,
-        icon: "",
-        temp: ""
-    },
-    sunUp: null,
-    sunDown: null,
-    currencyCode: ""
-}
+
 
 var mapBorder = null;
-let markers = L.markerClusterGroup();
-let videos = L.markerClusterGroup();
+let markers = L.markerClusterGroup({showCoverageOnHover: false});
+let videos = L.markerClusterGroup({ spiderfyOnMaxZoom: false, disableClusteringAtZoom: 1});
 
 var overlays = {
     'Places': markers,

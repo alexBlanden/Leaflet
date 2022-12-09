@@ -263,15 +263,6 @@ function getPlacesOfInterest(bbox){
         }
        //Create markers layer    
        markers.clearLayers();
-            
-        const geojsonMarkerOptions = {
-            radius: 8,
-            fillColor: "#6d7280",
-            color: "#000",
-            weight: 1,
-            opacity: 1,
-            fillOpacity: 0.8
-        };
 
         const infoMarker = L.ExtraMarkers.icon({
             // icon: 'fa-brands fa-wikipedia-w', <---Won't work :-/
@@ -346,15 +337,6 @@ function getCameras(iso){
         }
         videos.clearLayers();
 
-        const geojsonMarkerOptions = {
-            radius: 8,
-            fillColor: "#6d7280",
-            color: "#000",
-            weight: 1,
-            opacity: 1,
-            fillOpacity: 0.8
-        };
-
         const camsMarker = L.ExtraMarkers.icon({
             icon: 'fa-camera',
             markerColor: 'black',
@@ -364,27 +346,33 @@ function getCameras(iso){
         //Take each feature in resultAsJson, add html and bind popup
         let featureData = L.geoJSON(camsAsJson, {
                 onEachFeature: function (feature, layer) {
-                    const selectMenu = `<select id="${feature.properties.id}" class="form-select" aria-label="Default select example">
-                    <option selected>Videos</option>
-                    <option value="${feature.properties.lifetimeCam}">Day</option>
-                    <option value="${feature.properties.yearCam}">Month</option>
-                    <option value="${feature.properties.monthCam}">Year</option>
-                    </select>`
+                    let counter = 0;
+                    // const selectMenu = `<select class="form-select feedSelect" aria-label="Default select example">
+                    // <option selected>Videos</option>
+                    // <option value="${feature.properties.lifetimeCam}">Day</option>
+                    // <option value="${feature.properties.yearCam}">Month</option>
+                    // <option value="${feature.properties.monthCam}">Year</option>
+                    // </select>`
+                    // const content = 
+                    // `
+                    // <div class="container-fluid">
+                    //     <h6 class="text-center fw-bold">${feature.properties.name}</h6>
+                    //     ${selectMenu}
+                    //     <iframe src="" frameborder="0" class="video"></iframe>
+                    // </div>
+                    //     `
+                    //     $('.feedSelect').on('change', function () {
+                    //         $(".video").attr('src', $(".feedSelect").val());
+                    //     })
                     const content = 
-                    `
-                    <div class="container-fluid">
+                  `  <div class="container-fluid">
                         <h6 class="text-center fw-bold">${feature.properties.name}</h6>
-                        ${selectMenu}
-                        <iframe src="" frameborder="0" id="video-${feature.properties.id}"></iframe>
+                        <div class="d-flex justify-content-center">
+                         <iframe src=${feature.properties.lifetimeCam} frameborder="0" class="video"></iframe>
                         </div>
-                    </div>
-                        `
+                    </div>`
 
-                    const selectMenuId = $('#'+feature.properties.id)
                     layer.bindPopup(content)
-                    $(selectMenuId).on('change', function () {
-                        $("#video-"+feature.properties.id).attr('src', $("#"+feature.properties.id).val());
-                    })
                 },
                 pointToLayer: function (feature, latlng) {
                     return L.marker(latlng, {icon: camsMarker});
@@ -414,8 +402,6 @@ function getWeather(iso) {
     );
     $.when(contactOpenWeather).then(function (result){
         console.log(result);
-        // $('#carouselInfo').text("")
-        // $('#indicators').text("")
         
         //Clear arrays used for weatherChart:
         timeOfDay.length = 0;
@@ -423,21 +409,19 @@ function getWeather(iso) {
         bgroundColor.length = 0;
         const daysOfTheWeek = ["Sun", "Mon", "Tues", "Weds", "Thurs", "Fri", "Sat"]
         
-        //Iterate over result array and append bootstrap info cards to bootstrap carousel in weather modal. Cards added in pairs:
+
         for(let i = 0; i<result.data.list.length; i++){
             let date = new Date(result.data.list[i].dt * 1000);
             if(i == 0){
-                timeOfDay.push(`${daysOfTheWeek[date.getDay()]} ${date.getDate()}`)
+                timeOfDay.push(Date.parse(date).toString('ddd HH ss'))
                 temperature.push(result.data.list[i].main.temp)
                 i++
             }
 
-            if(date.toLocaleTimeString("en-GB") == '03:00:00'){
-                timeOfDay.push(`${daysOfTheWeek[date.getDay()]} ${date.getDate()}`);
+            if(Date.parse(date).toString('HH mm')== '00 00'){
+                timeOfDay.push(Date.parse(date).toString('ddd HH ss'))
             } else{
-                timeOfDay.push(date.toLocaleTimeString("en-US", {
-                    hour: '2-digit', minute: '2-digit'
-                }));
+                timeOfDay.push(Date.parse(date).toString('HH mm'))
             }
             
             temperature.push(result.data.list[i].main.temp)
