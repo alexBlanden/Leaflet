@@ -3,9 +3,11 @@
 ini_set('display_errors', 'On');
 error_reporting(E_ALL);
 
+//find co-ordinates for Capital City
 $rawData = file_get_contents('./country-capitals.json');
 $cityList = json_decode($rawData, true);
 
+$cityName ="";
 $cityLat = "";
 $cityLng = "";
 
@@ -19,6 +21,7 @@ for($i=0; $i < $length; $i++){
     if($cityList[$i]['CountryCode'] == $requestedCountry){
         $cityLat = $cityList[$i]['CapitalLatitude'];
         $cityLng = $cityList[$i]['CapitalLongitude'];
+        $cityName = $cityList[$i]['CapitalName'];
         break;
     // } else {
     //     $output['status']['code'] = '400';
@@ -47,7 +50,8 @@ $decode = json_decode($result, true);
 $output['status']['code'] = '200';
 $output['status']['name'] = 'weatherQueryResult';
 $output['status']['description'] = 'success';
-$output['data'] = $decode;
+$output['data']['weatherInfo'] = $decode;
+$output['data']['city'] = $cityName;
 
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json; charset=UTF-8');

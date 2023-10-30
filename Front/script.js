@@ -65,7 +65,7 @@ var overlays = {
     'Video Stations': videos,
 }
 
-var layerControl = L.control.layers(null, overlays).addTo(map);
+var layerControl = L.control.layers(null, overlays, {position: 'bottomleft'}).addTo(map);
 //Create Bootstrap 5 modals for country info
 var countryModal = new bootstrap.Modal($('#countryModal'));
 var weatherModal = new bootstrap.Modal($('#weatherModal'));
@@ -283,7 +283,6 @@ function populateSelectMenu () {
         }
     );
     $.when(getGeoJson).then(function (result){
-        console.log(result)
         for(let i= 0; i < result.data.length; i++){
             $('#country_menu').append(
                 `<option class="country_menu_select" value="${result.data[i].iso_a2}">${result.data[i].name}</option>`)
@@ -301,12 +300,10 @@ function loadMap () {
 }
 
 function drawCountryBorders (iso) {
-    console.log(`start with ISO: ${iso}`)
     var countryBorders = fetchAjax(
         `Back/geoJsonCoordinates.php`,
         {iso}
     );$.when(countryBorders).then(function (result){
-        console.log(result)
         //Check for previous selected country's border
         if(mapBorder){
             mapBorder.remove()
@@ -317,7 +314,6 @@ function drawCountryBorders (iso) {
         }).addTo(map)
         //Center map view on newly selected country
         boundingBox = mapBorder.getBounds();
-        // console.log(boundingBox);
         map.fitBounds(mapBorder.getBounds())
 
         let initialBoundingBox = JSON.parse(JSON.stringify(mapBorder.getBounds()))

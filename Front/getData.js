@@ -45,7 +45,6 @@ function getDataFromCoordinates(lat,lng) {
     }
 );
 $.when(contactOpenCage).then(function(result){
-    console.log(result)
     //saves iso and country name from returned data
     let isoA2 = result.data.results[0].components.country_code.toUpperCase();
 
@@ -57,8 +56,7 @@ $.when(contactOpenCage).then(function(result){
 });
 }
 
-
-function getHolidays (iso) {
+function getHolidays(iso) {
     $('#holidaysLoading').show();
     $('#holidaysTable').hide();
     
@@ -72,7 +70,6 @@ function getHolidays (iso) {
         }
     );
     $.when(contactHolidaysAPI).then(function(result){
-        console.log(result)
         $('#holidaysTable').show();
         $('#holidaysLoading').hide();
         $('#pastholidaysBody, #todayholidaysBody, #upcomingholidaysBody').html("");
@@ -128,7 +125,6 @@ function getNews(iso){
         }
     );
     $.when(contactNewsAPI).then(function (result){
-        console.log(result)
         //Clear previous entries
         $('#newsBody').html("")
         //Service not available in all countries
@@ -167,7 +163,6 @@ function getHealthExpenditure(iso){
             healthExpenditureValue.push(result.data[i].value);
         }
         healthChart.update();
-        console.log(result);
         $('#healthChart').show();
     }, function (err){
         console.log(err.responseText);
@@ -190,7 +185,6 @@ function getEduExpenditure(iso){
             eduExpenditureValue.push(result.data[i].value);
         }
         eduChart.update();
-        console.log(result);
         $('#educhart').show();
     }, function (err){
         console.log(err.responseText);
@@ -214,7 +208,6 @@ function getMilitaryExpenditure(iso){
         }
         militaryChart.update();
         $('#militaryChart').show();
-        console.log(result);
     })
 }
 
@@ -230,6 +223,7 @@ function getPlacesOfInterest(bbox){
         if(!result.data.geonames || result.data.status == 13){
             markers.clearLayers();
             alert("Sorry Places of interest API unavailable. Please try again.")
+            return
         }
         //result needs to be geoJson
         var resultAsJson = {
@@ -307,7 +301,7 @@ function getCameras(iso){
         }
     );
     $.when(cameraLocations).then(function(result){
-        console.log(result)
+        console.log(result.data.webcams.length)
         var camsAsJson = {
             type: "FeatureCollection",
             features: [
@@ -317,20 +311,20 @@ function getCameras(iso){
 
         camsAsJson.features.length = 0;
 
-        for(let i= 0; i < result.data.result.webcams.length; i++){
+        for(let i= 0; i < result.data.webcams.length; i++){
             camsAsJson.features.push(
                 {
                     type: "Feature",
                     geometry: {
                         type: "Point",
-                        coordinates: [result.data.result.webcams[i].location.longitude, result.data.result.webcams[i].location.latitude]
+                        coordinates: [result.data.webcams[i].location.longitude, result.data.webcams[i].location.latitude]
                     },
                     properties: {
-                        id: result.data.result.webcams[i].id,
-                        name: result.data.result.webcams[i].title,
-                        lifetimeCam: result.data.result.webcams[i].player.lifetime.embed,
-                        monthCam: result.data.result.webcams[i].player.month.embed,
-                        yearCam: result.data.result.webcams[i].player.year.embed
+                        id: result.data.webcams[i].id,
+                        name: result.data.webcams[i].title,
+                        lifetimeCam: result.data.webcams[i].player.lifetime,
+                        monthCam: result.data.webcams[i].player.month,
+                        yearCam: result.data.webcams[i].player.year
                     }
                 },
             )
@@ -395,19 +389,15 @@ function getWeather(iso) {
     var contactOpenWeather = fetchAjax (
         'Back/OpenWeather.php',
         {
-            // latitude,
-            // longitude
             iso
         }
     );
     $.when(contactOpenWeather).then(function (result){
-        console.log(result);
-        
         //Clear arrays used for weatherChart:
         timeOfDay.length = 0;
         temperature.length = 0;
         bgroundColor.length = 0;
-        const daysOfTheWeek = ["Sun", "Mon", "Tues", "Weds", "Thurs", "Fri", "Sat"]
+        // const daysOfTheWeek = ["Sun", "Mon", "Tues", "Weds", "Thurs", "Fri", "Sat"]
         
 
         for(let i = 0; i<result.data.list.length; i++){
@@ -479,31 +469,32 @@ function getFiveDayForecast (iso) {
     $.when(contactOpenMeteo).then(function (result){
         $("#card-1").empty();
         $("#card-2").empty();
-        console.log(result)
         //Populate weather info, first item is separate from smaller info cards
-        let headlineDate = new Date(result.data.daily.time[0]);
-        const units = result.data.daily_units.temperature_2m_max;
-        let sunrise = new Date(result.data.daily.sunrise[0])
-        let sunset = new Date(result.data.daily.sunset[0])
+        let headlineDate = new Date(result.data.weatherInfo.daily.time[0]);
+        const units = result.data.weatherInfo.daily_units.temperature_2m_max;
+        let sunrise = new Date(result.data.weatherInfo.daily.sunrise[0])
+        let sunset = new Date(result.data.weatherInfo.daily.sunset[0])
         //CSS for headline color is temp dependent
         let colour = "white, ";
-        let midRange = (result.data.daily.temperature_2m_max[0] + result.data.daily.temperature_2m_min[0])/2
-        // const headlineColorCss = `linear-gradient(to bottom right, white, ${colour})`;
+        let midRange = (result.data.weatherInfo.daily.temperature_2m_max[0] + result.data.weatherInfo.daily.temperature_2m_min[0])/2;
         $('#headline-card').html(
             `<div class="card">
             <div class="card-body" id="headline-body">
-              <h5 class="card-title">${Date.parse(headlineDate).toString("ddd dS MMM")}</h5>
               <span>
-              <h5 class="card-text">${Math.round(result.data.daily.temperature_2m_max[0])}${units}</h5>
-              <p>${Math.round(result.data.daily.temperature_2m_min[0])}</p>
+              <h4 class="card-title">${result.data.city}</h4>
+              <h5 class="card-text">${Date.parse(headlineDate).toString("ddd dS MMM")}</h5>
               </span>
-              <i id="hero-icon" class="wi wi-wmo4680-${result.data.daily.weathercode[0]}"></i> 
+              <span>
+              <h5 class="card-text">${Math.round(result.data.weatherInfo.daily.temperature_2m_max[0])}${units}</h5>
+              <p>${Math.round(result.data.weatherInfo.daily.temperature_2m_min[0])}</p>
+              </span>
+              <i id="hero-icon" class="wi wi-wmo4680-${result.data.weatherInfo.daily.weathercode[0]}"></i> 
             </div>
             <div class="card-footer">
                 <span><i class="wi wi-sunrise weather-icon-small"></i> ${sunrise.toLocaleTimeString("en-US", {
                     hour: '2-digit', minute: '2-digit'
                 })}</span>
-                <span>Rain: ${result.data.daily.rain_sum[0]}mm</span>
+                <span>Rain: ${result.data.weatherInfo.daily.rain_sum[0]}mm</span>
                 <span><i class="wi wi-sunset weather-icon-footer"></i> ${sunset.toLocaleTimeString("en-US", {
                     hour: '2-digit', minute: '2-digit'
                 })}</span>
@@ -535,30 +526,30 @@ function getFiveDayForecast (iso) {
             colour +='rgba(0, 255, 192, 1)'    
         } else if (midRange>0) {
             //deep blue
-            colour += 'rgba(0, 75, 255, 1)'   
+            colour += 'rgba(0, 75, 255, 0.5)'
+  
         } else if(midRange < 0){
             //white
-            colour += 'blue, white';
+            colour += 'white,rgba(0, 75, 255, 1), black';
         }
         $('#headline-body').css('background-image', `linear-gradient(to bottom right, white, ${colour})`);
 
-        for(let i=1; i<result.data.daily.time.length/2; i++){
-            let date = new Date(result.data.daily.time[i])
-            let date2 = new Date(result.data.daily.time[i+3])
-            console.log(date);
+        for(let i=1; i<result.data.weatherInfo.daily.time.length/2; i++){
+            let date = new Date(result.data.weatherInfo.daily.time[i])
+            let date2 = new Date(result.data.weatherInfo.daily.time[i+3])
             $('#card-1').append(
                 `<div class="card" style="width: 18rem;">
                 <div class="card-body">
                 <div class="weather-text-container">
                   <h5 class="card-title">${Date.parse(date).toString("ddd dS")}</h5>
                   <span class="min-max-weather">
-                  <p class="card-text"><strong>${Math.round(result.data.daily.temperature_2m_max[i])}${units}</strong></p>
+                  <p class="card-text"><strong>${Math.round(result.data.weatherInfo.daily.temperature_2m_max[i])}${units}</strong></p>
                   <p class="card-text-min-temp">
-                  ${Math.round(result.data.daily.temperature_2m_min[i])}${units}
+                  ${Math.round(result.data.weatherInfo.daily.temperature_2m_min[i])}${units}
                   </p>
                   </span>
                 </div>
-                  <i class="wi wi-wmo4680-${result.data.daily.weathercode[i]} weather-icon-small"></i>
+                  <i class="wi wi-wmo4680-${result.data.weatherInfo.daily.weathercode[i]} weather-icon-small"></i>
                 </div>
               </div>`
             )
@@ -568,13 +559,13 @@ function getFiveDayForecast (iso) {
                 <div class="weather-text-container">
                 <h5 class="card-title">${Date.parse(date2).toString("ddd dS")}</h5>
                 <span class="min-max-weather">
-                <p class="card-text"><strong>${Math.round(result.data.daily.temperature_2m_max[i+3])}${units}</strong></p>
+                <p class="card-text"><strong>${Math.round(result.data.weatherInfo.daily.temperature_2m_max[i+3])}${units}</strong></p>
                 <p class="card-text-min-temp">
-                  ${Math.round(result.data.daily.temperature_2m_min[i+3])}${units}
+                  ${Math.round(result.data.weatherInfo.daily.temperature_2m_min[i+3])}${units}
                   </p>
                   </span>
                 </div>
-                <i class="wi wi-wmo4680-${result.data.daily.weathercode[i+3]} weather-icon-small"></i>
+                <i class="wi wi-wmo4680-${result.data.weatherInfo.daily.weathercode[i+3]} weather-icon-small"></i>
                 </div>
               </div>`
             )
@@ -594,7 +585,6 @@ function getFromRestCountries(iso) {
         }
     );
     $.when(contactRestCountries).then(function(result){
-        console.log(result)
         var currencyName;
         var currencySymbol;
         var currencyCode;
@@ -639,11 +629,10 @@ function getCurrencyInfo(currencyCode, currencyName, currencySymbol){
     }
     );
     $.when(contactOpenExchange).then(function(result){
-        console.log(result)
         const currencyValue = result.data.rates
         const num = parseFloat(Object.values(currencyValue)).toFixed(2);
         $("#currencyname").html(`<h4>Currency: ${currencyName}(${currencySymbol})</h4>`)
-        $("#vsthedollar").html(`<h5>1 US Dollar is worth: ${currencySymbol}${num}</h5>`)
+        $("#vsthedollar").html(`<h5>1 US Dollar is worth: ${currencySymbol}${parseFloat(num).toFixed(2)}</h5>`)
         $('#calc > div > label').html(`$ to ${currencySymbol} converter`)
 
         $('#calc-button').on('click',()=> {
