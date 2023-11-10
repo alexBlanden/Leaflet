@@ -3,4 +3,4 @@ Front/node_modules
 Front/assets/fontawesome
 Front/assets/weather-icons-master
 Front/assets/Datejs-master
-.env
+Back/.env
